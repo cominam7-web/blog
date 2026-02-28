@@ -13,7 +13,6 @@ export interface PostData {
 }
 
 export function getSortedPostsData() {
-  // src/posts 폴더가 없으면 빈 배열 반환
   if (!fs.existsSync(postsDirectory)) return [];
 
   const fileNames = fs.readdirSync(postsDirectory);
@@ -27,21 +26,42 @@ export function getSortedPostsData() {
 
       return {
         slug,
-        ...(matterResult.data as { title: string; date: string; excerpt: string }),
+        title: matterResult.data.title || slug,
+        date: matterResult.data.date || new Date().toISOString(),
+        excerpt: matterResult.data.excerpt || '',
+        content: matterResult.content,
       };
     });
 
-  return allPostsData.sort((a, b) => (a.date < b.date ? 1 : -1));
+  return allPostsData.sort((a, b) => {
+    if (a.date < b.date) return 1;
+    if (a.date > b.date) return -1;
+    return 0;
+  });
 }
 
 export function getPostData(slug: string): PostData {
   const fullPath = path.join(postsDirectory, `${slug}.md`);
+
+  // 파일이 없으면 에러를 던지기보다 기본 데이터를 반환해 빌드 중단을 방지할 수 있음 (또는 404 처리)
+  if (!fs.existsSync(fullPath)) {
+    return {
+      slug,
+      title: 'Post Not Found',
+      date: '',
+      excerpt: '',
+      content: '요청하신 포스트를 찾을 수 없습니다.',
+    };
+  }
+
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const matterResult = matter(fileContents);
 
   return {
     slug,
+    title: matterResult.data.title || slug,
+    date: matterResult.data.date || '',
+    excerpt: matterResult.data.excerpt || '',
     content: matterResult.content,
-    ...(matterResult.data as { title: string; date: string; excerpt: string }),
   };
 }
