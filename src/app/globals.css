@@ -30,17 +30,39 @@ body {
 
 /* Typography 가독성 향상 - 흰 배경 위주로 고정 */
 .prose {
-  --tw-prose-body: #1f2937;
-  /* slate-800 */
+  --tw-prose-body: #374151;
+  /* slate-700 - 조금 더 부드러운 검정 */
   --tw-prose-headings: #030712;
   /* slate-950 */
   --tw-prose-links: #2563eb;
   /* blue-600 */
+
+  line-height: 1.8;
+  /* 행간 대폭 확대 */
+  letter-spacing: -0.01em;
+  /* 자간 미세 조정 */
+}
+
+/* 문단 간 여백 및 리스트 간격 조정 */
+.prose p {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.prose li {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose h2,
+.prose h3 {
+  margin-top: 2.5em !important;
+  margin-bottom: 1em !important;
 }
 
 @media (prefers-color-scheme: dark) {
   .prose {
-    --tw-prose-body: #1f2937;
+    --tw-prose-body: #374151;
     --tw-prose-headings: #030712;
     --tw-prose-links: #2563eb;
   }
