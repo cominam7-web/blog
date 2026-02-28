@@ -9,6 +9,7 @@ export interface PostData {
   title: string;
   date: string;
   excerpt: string;
+  category: string;
   content: string;
 }
 
@@ -29,6 +30,7 @@ export function getSortedPostsData() {
         title: matterResult.data.title || slug,
         date: matterResult.data.date || new Date().toISOString(),
         excerpt: matterResult.data.excerpt || '',
+        category: matterResult.data.category || 'Hacks',
         content: matterResult.content,
       };
     });
@@ -50,6 +52,7 @@ export function getPostData(slug: string): PostData {
       title: 'Post Not Found',
       date: '',
       excerpt: '',
+      category: '',
       content: '요청하신 포스트를 찾을 수 없습니다.',
     };
   }
@@ -62,6 +65,7 @@ export function getPostData(slug: string): PostData {
     title: matterResult.data.title || slug,
     date: matterResult.data.date || '',
     excerpt: matterResult.data.excerpt || '',
+    category: matterResult.data.category || 'Hacks',
     content: matterResult.content,
   };
 }
