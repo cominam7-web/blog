@@ -92,10 +92,11 @@ export function searchPosts(query: string): PostData[] {
 export function resolveNanobanana(text: string): string {
   if (!text) return '';
 
-  // Ultra-flexible regex: 
-  // Supports [나노바나나: ...], [Nanobanana: ...], [나노바나나 : ...], [나노바나나 - ...]
-  // Handles multi-line prompts and any invisible characters
-  const nanobananaRegex = /\[(?:나노\s*바나나|Nanobanana)\s*[:：-]\s*([\s\S]*?)\]/i;
+  // Ultimate flexible regex: 
+  // Brackets: [ ] or ［ ］
+  // Keywords: 나노바나나, 나노 바나나, Nanobanana
+  // Separators: : ： - or just space
+  const nanobananaRegex = /[\[［](?:나노\s*바나나|Nanobanana)\s*[:：\-\s]\s*([\s\S]*?)[\]］]/i;
   const match = text.match(nanobananaRegex);
 
   if (match) {
