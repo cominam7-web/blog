@@ -9,28 +9,27 @@ export default function About() {
                 </Link>
 
                 <h1 className="text-4xl font-extrabold text-slate-900 mb-8 tracking-tight">
-                    About AI Auto Blog
+                    About Ilsanggam Life Studio
                 </h1>
 
                 <div className="prose prose-slate prose-lg lg:prose-xl">
                     <p>
-                        안녕하세요! <strong>AI Auto Blog</strong>에 오신 것을 환영합니다.
-                        이 블로그는 최첨단 인공지능 기술과 클라우드 자동화 시스템을 결합하여 운영되는 미래형 지식 저장소입니다.
+                        안녕하세요! <strong>Ilsanggam Life Studio</strong>에 오신 것을 환영합니다.
+                        이곳은 단순한 정보 나열을 넘어, 여러분의 소중한 일상을 더 가치 있게 만드는 지식 스튜디오입니다.
                     </p>
 
-                    <h3>운영 목적</h3>
+                    <h3>우리의 철학</h3>
                     <p>
-                        우리는 넘쳐나는 정보 속에서 가장 가치 있는 생활 정보와 지식을 골라내어,
-                        누구나 이해하기 쉬운 언어로 정제하여 전달하는 것을 목표로 합니다.
-                        복잡한 정책, 금융 정보, 일상 꿀팁들을 AI의 힘을 빌려 빠르고 정확하게 제공합니다.
+                        우리는 '일상의 감각'을 깨우는 정보를 제공합니다.
+                        최첨단 AI 자동화 기술을 활용하여, 복잡한 세상 속에서 꼭 필요한 핵심 정보만을 정밀하게 추출하고
+                        가장 읽기 편한 형태로 독자들에게 전달합니다.
                     </p>
 
-                    <h3>사용된 기술</h3>
+                    <h3>전문적인 콘텐츠</h3>
                     <ul>
-                        <li><strong>Next.js 15</strong>: 쾌적한 속도와 SEO 최적화를 위한 현대적인 웹 프레임워크</li>
-                        <li><strong>Google Gemini AI</strong>: 깊이 있고 인간미 넘치는 콘텐츠 생성을 위한 두뇌</li>
-                        <li><strong>Make.com</strong>: 끊김 없는 콘텐츠 발행을 위한 자동화 파이프라인</li>
-                        <li><strong>Supabase</strong>: 안전한 데이터 저장 및 관리를 위한 백엔드 서비스</li>
+                        <li><strong>Life Hack</strong>: 일상의 효율을 극대화하는 스마트한 팁</li>
+                        <li><strong>Smart Info</strong>: 놓치기 쉬운 정책, 금융, 생활 법률 정보</li>
+                        <li><strong>AI Insights</strong>: 인공지능 기술이 제안하는 미래형 생활 방식</li>
                     </ul>
 
                     <p>

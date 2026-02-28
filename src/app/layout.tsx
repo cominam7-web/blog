@@ -15,15 +15,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "AI Auto Blog | 자동화된 지식 저장소",
-    template: "%s | AI Auto Blog"
+    default: "Ilsanggam Life Studio | 최고의 생활 정보 저장소",
+    template: "%s | Ilsanggam Life Studio"
   },
-  description: "Make, Supabase, GitHub로 운영되는 지식 자동화 블로그입니다. 전문적인 생활 정보를 실시간으로 제공합니다.",
-  keywords: ["블로그 자동화", "AI 블로그", "생활 정보", "Next.js", "수익형 블로그"],
-  authors: [{ name: "AI Blogger" }],
+  description: "Ilsanggam Life Studio는 전문적인 생활 정보와 라이프스타일 팁을 AI 기술로 자동화하여 전달하는 프리미엄 블로그입니다.",
+  keywords: ["Ilsanggam Life Studio", "생활 정보", "라이프스타일", "AI 블로그", "수익형 블로그"],
+  authors: [{ name: "Ilsanggam Team" }],
   openGraph: {
-    title: "AI Auto Blog | 자동화된 지식 저장소",
-    description: "Make, Supabase, GitHub로 운영되는 지식 자동화 블로그",
+    title: "Ilsanggam Life Studio | 최고의 생활 정보 저장소",
+    description: "전문적인 생활 정보와 라이프스타일 팁을 제공하는 프리미엄 자동화 블로그",
     type: "website",
     locale: "ko_KR",
   }
