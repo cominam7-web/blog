@@ -1,6 +1,15 @@
+'use client';
+
 import Link from 'next/link';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const router = useRouter();
+
     const categories = [
         { name: 'LATEST', href: '/' },
         { name: 'TECH', href: '/category/tech' },
@@ -14,9 +23,52 @@ export default function Header() {
         { name: 'HACKS', href: '/category/hacks' }
     ];
 
+    useEffect(() => {
+        if (isSearchOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [isSearchOpen]);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+            setIsSearchOpen(false);
+            setSearchQuery('');
+        }
+    };
+
     return (
         <header className="bg-white px-4 sm:px-6 lg:px-8 pt-6 sticky top-0 z-50 border-b border-transparent hover:border-slate-100 transition-colors bg-white/95 backdrop-blur-sm">
             <div className="max-w-7xl mx-auto">
+                {/* Search Overlay */}
+                {isSearchOpen && (
+                    <div className="absolute inset-0 bg-white z-[60] flex items-center px-4 sm:px-6 lg:px-8 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <form onSubmit={handleSearch} className="flex-grow flex items-center max-w-7xl mx-auto">
+                            <svg className="w-6 h-6 text-slate-400 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search stories, tips, and hacks..."
+                                className="flex-grow bg-transparent border-none text-xl sm:text-2xl font-bold text-slate-900 placeholder:text-slate-300 focus:ring-0 py-4"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setIsSearchOpen(false)}
+                                className="ml-4 p-2 text-slate-400 hover:text-slate-900 transition-colors"
+                            >
+                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                )}
+
                 {/* Top Section */}
                 <div className="flex justify-between items-center pb-6">
                     <Link href="/" className="inline-block border-2 border-slate-900 px-3 py-1 hover:bg-slate-900 hover:text-white transition-all duration-300 transform active:scale-95">
@@ -32,7 +84,11 @@ export default function Header() {
                             <button className="w-6 h-6 border-2 border-slate-900 rounded-sm flex items-center justify-center text-[10px] font-black hover:bg-slate-900 hover:text-white transition-colors">FB</button>
                         </div>
                         <div className="h-6 w-[2px] bg-slate-200 hidden md:block"></div>
-                        <button className="p-1 hover:text-blue-600 transition-colors" aria-label="Search">
+                        <button
+                            className="p-1 hover:text-blue-600 transition-colors"
+                            aria-label="Search"
+                            onClick={() => setIsSearchOpen(true)}
+                        >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>

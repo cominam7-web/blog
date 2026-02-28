@@ -73,3 +73,18 @@ export function getPostData(slug: string): PostData {
     content: matterResult.content,
   };
 }
+
+export function searchPosts(query: string): PostData[] {
+  const allPosts = getSortedPostsData();
+  const lowerQuery = query.toLowerCase();
+
+  return allPosts.filter(post => {
+    // getPostData to get full content for search
+    const fullPost = getPostData(post.slug);
+    return (
+      post.title.toLowerCase().includes(lowerQuery) ||
+      post.excerpt.toLowerCase().includes(lowerQuery) ||
+      fullPost.content.toLowerCase().includes(lowerQuery)
+    );
+  });
+}
