@@ -29,6 +29,8 @@ export const metadata: Metadata = {
   }
 };
 
+import Header from "@/components/Header";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,6 +42,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased selection:bg-blue-100 selection:text-blue-900`}
       >
         <div className="min-h-screen flex flex-col">
+          <Header />
           <div className="flex-grow">
             {children}
           </div>
