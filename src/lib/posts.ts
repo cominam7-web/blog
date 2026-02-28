@@ -10,6 +10,7 @@ export interface PostData {
   date: string;
   excerpt: string;
   category: string;
+  image?: string;
   content: string;
 }
 
@@ -31,6 +32,7 @@ export function getSortedPostsData() {
         date: matterResult.data.date || new Date().toISOString(),
         excerpt: matterResult.data.excerpt || '',
         category: matterResult.data.category || 'Hacks',
+        image: matterResult.data.image || '',
         content: matterResult.content,
       };
     });
@@ -53,6 +55,7 @@ export function getPostData(slug: string): PostData {
       date: '',
       excerpt: '',
       category: '',
+      image: '',
       content: '요청하신 포스트를 찾을 수 없습니다.',
     };
   }
@@ -66,6 +69,7 @@ export function getPostData(slug: string): PostData {
     date: matterResult.data.date || '',
     excerpt: matterResult.data.excerpt || '',
     category: matterResult.data.category || 'Hacks',
+    image: matterResult.data.image || '',
     content: matterResult.content,
   };
 }
