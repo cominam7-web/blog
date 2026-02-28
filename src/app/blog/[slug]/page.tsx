@@ -1,5 +1,6 @@
 import { getPostData, getSortedPostsData } from '@/lib/posts';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 
 export async function generateStaticParams() {
     const posts = getSortedPostsData();
@@ -26,14 +27,8 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     <p className="mt-4 text-slate-500">{postData.date}</p>
                 </header>
 
-                <div className="prose prose-slate lg:prose-xl max-w-none">
-                    {/* 
-            실무에서는 markdown-to-html 변환기(remark, rehype 등)를 쓰지만, 
-            지금은 컨셉 확인용으로 단순 표시합니다. 
-          */}
-                    <div className="whitespace-pre-wrap leading-relaxed text-slate-700">
-                        {postData.content}
-                    </div>
+                <div className="prose prose-slate lg:prose-xl max-w-none prose-headings:text-slate-900 prose-a:text-blue-600 prose-img:rounded-2xl prose-img:shadow-premium">
+                    <ReactMarkdown>{postData.content}</ReactMarkdown>
                 </div>
             </div>
         </article>
