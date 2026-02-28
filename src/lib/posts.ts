@@ -88,3 +88,20 @@ export function searchPosts(query: string): PostData[] {
     );
   });
 }
+
+export function resolveNanobanana(text: string): string {
+  if (!text) return '';
+
+  // Regex to match [나노바나나: {prompt}]
+  const nanobananaRegex = /\[나노바나나:\s*(.*?)\]/i;
+  const match = text.match(nanobananaRegex);
+
+  if (match) {
+    const prompt = match[1];
+    // Extract keywords for a fallback image (using Picsum for now as a stable source)
+    const keywords = prompt.split(' ').slice(0, 3).join(',').replace(/[^a-zA-Z,]/g, '');
+    return `https://picsum.photos/seed/${encodeURIComponent(keywords || 'hacks')}/1200/630`;
+  }
+
+  return text; // Return as is if it's already a URL or no tag found
+}

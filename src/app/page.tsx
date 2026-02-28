@@ -1,8 +1,11 @@
 import Link from 'next/link';
-import { getSortedPostsData } from '@/lib/posts';
+import { getSortedPostsData, resolveNanobanana } from '@/lib/posts';
 
 export default function Home() {
-  const allPostsData = getSortedPostsData();
+  const allPostsData = getSortedPostsData().map(post => ({
+    ...post,
+    image: resolveNanobanana(post.image)
+  }));
   const featuredPost = allPostsData[0];
   const remainingPosts = allPostsData.slice(1);
 

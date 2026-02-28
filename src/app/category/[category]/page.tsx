@@ -1,4 +1,4 @@
-import { getSortedPostsData } from '@/lib/posts';
+import { getSortedPostsData, resolveNanobanana } from '@/lib/posts';
 import Link from 'next/link';
 
 export async function generateStaticParams() {
@@ -16,11 +16,17 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     const allPosts = getSortedPostsData();
 
     // 카테고리 필터링 로직 (LATEST는 전체 보기)
-    const filteredPosts = category.toLowerCase() === 'latest'
+    const rawFilteredPosts = category.toLowerCase() === 'latest'
         ? allPosts
         : allPosts.filter(post =>
             post.category?.toLowerCase().replace(/ /g, '-') === category.toLowerCase()
         );
+
+    // Resolve Nanobanana images
+    const filteredPosts = rawFilteredPosts.map(post => ({
+        ...post,
+        image: resolveNanobanana(post.image || '')
+    }));
 
     const categoryTitle = category.toUpperCase().replace(/-/g, ' ');
 
@@ -42,12 +48,20 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
                         {filteredPosts.map((post) => (
                             <article key={post.slug} className="group border-b border-dashed border-slate-200 pb-12 last:border-0 h-full flex flex-col">
-                                <Link href={`/blog/${post.slug}`} className="mb-6 block overflow-hidden aspect-video bg-slate-50 rounded-sm">
-                                    <div className="w-full h-full flex items-center justify-center text-slate-200 group-hover:scale-105 transition-transform duration-500">
-                                        <svg className="w-12 h-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
+                                <Link href={`/blog/${post.slug}`} className="mb-6 block overflow-hidden aspect-video bg-slate-50 rounded-sm relative">
+                                    {post.image ? (
+                                        <img
+                                            src={post.image}
+                                            alt={post.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-slate-200 group-hover:scale-105 transition-transform duration-500">
+                                            <svg className="w-12 h-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    )}
                                 </Link>
                                 <div className="space-y-4 flex-grow">
                                     <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{post.category || 'Hacks'}</p>

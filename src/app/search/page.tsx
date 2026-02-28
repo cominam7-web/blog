@@ -1,14 +1,20 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { searchPosts } from '@/lib/posts';
+import { searchPosts, resolveNanobanana } from '@/lib/posts';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
 function SearchResults() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q') || '';
-    const results = query ? searchPosts(query) : [];
+    const rawResults = query ? searchPosts(query) : [];
+
+    // Resolve Nanobanana images for results
+    const results = rawResults.map(post => ({
+        ...post,
+        image: resolveNanobanana(post.image || '')
+    }));
 
     return (
         <main className="min-h-screen bg-white">

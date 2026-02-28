@@ -1,5 +1,6 @@
-import { getPostData, getSortedPostsData } from '@/lib/posts';
+import { getPostData, getSortedPostsData, resolveNanobanana } from '@/lib/posts';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 
 export async function generateStaticParams() {
@@ -12,6 +13,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const post = getPostData(slug);
+
+    if (!post) {
+        return {
+            title: 'Post Not Found',
+        };
+    }
 
     return {
         title: post.title,
@@ -27,7 +34,24 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function Post({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const postData = getPostData(slug);
+    const rawPostData = getPostData(slug);
+
+    if (!rawPostData) {
+        notFound();
+    }
+
+    // Resolve Nanobanana images
+    const postData = {
+        ...rawPostData,
+        image: resolveNanobanana(rawPostData.image || ''),
+        content: rawPostData.content || ''
+    };
+
+    // Helper to render content with nanobanana tags as images
+    const processedContent = postData.content.replace(/\[나노바나나:\s*(.*?)\]/gi, (match) => {
+        const imageUrl = resolveNanobanana(match);
+        return `\n\n![Nanobanana Image](${imageUrl})\n\n`;
+    });
 
     return (
         <article className="min-h-screen bg-white">
@@ -87,7 +111,26 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     )}
 
                     <div className="prose prose-slate prose-lg lg:prose-xl max-w-none prose-headings:text-slate-950 prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase prose-strong:text-slate-900 prose-a:text-blue-600">
-                        <ReactMarkdown>{postData.content}</ReactMarkdown>
+                        <ReactMarkdown
+                            components={{
+                                img: ({ node, ...props }) => (
+                                    <div className="my-12 bg-slate-50 border border-dashed border-slate-200 p-2 overflow-hidden group">
+                                        <img
+                                            className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-700"
+                                            {...props}
+                                            alt={props.alt || 'Nanobanana Content Image'}
+                                        />
+                                        {props.alt && props.alt !== 'Nanobanana Image' && (
+                                            <p className="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 italic">
+                                                {props.alt}
+                                            </p>
+                                        )}
+                                    </div>
+                                )
+                            }}
+                        >
+                            {processedContent}
+                        </ReactMarkdown>
                     </div>
 
                     {/* Related/Footer Info */}
