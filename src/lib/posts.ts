@@ -92,15 +92,16 @@ export function searchPosts(query: string): PostData[] {
 export function resolveNanobanana(text: string): string {
   if (!text) return '';
 
-  // Regex to match [나노바나나: {prompt}]
-  const nanobananaRegex = /\[나노바나나:\s*(.*?)\]/i;
+  // Regex to match [나노바나나: {prompt}] - more robust version
+  const nanobananaRegex = /\[나노바나나:\s*([\s\S]*?)\]/i;
   const match = text.match(nanobananaRegex);
 
   if (match) {
-    const prompt = match[1];
-    // Extract keywords for a fallback image (using Picsum for now as a stable source)
-    const keywords = prompt.split(' ').slice(0, 3).join(',').replace(/[^a-zA-Z,]/g, '');
-    return `https://picsum.photos/seed/${encodeURIComponent(keywords || 'hacks')}/1200/630`;
+    const prompt = match[1].trim();
+    // Use pollinations.ai to actually GENERATE the image based on the prompt
+    // This provides much better relevance than Picsum
+    const encodedPrompt = encodeURIComponent(prompt);
+    return `https://pollinations.ai/p/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
   }
 
   return text; // Return as is if it's already a URL or no tag found
