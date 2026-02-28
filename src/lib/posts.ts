@@ -92,16 +92,18 @@ export function searchPosts(query: string): PostData[] {
 export function resolveNanobanana(text: string): string {
   if (!text) return '';
 
-  // Flexible regex to handle spaces around colon and newlines inside brackets
-  const nanobananaRegex = /\[나노바나나\s*:\s*([\s\S]*?)\]/i;
+  // Ultra-flexible regex: 
+  // Supports [나노바나나: ...], [Nanobanana: ...], [나노바나나 : ...], [나노바나나 - ...]
+  // Handles multi-line prompts and any invisible characters
+  const nanobananaRegex = /\[(?:나노\s*바나나|Nanobanana)\s*[:：-]\s*([\s\S]*?)\]/i;
   const match = text.match(nanobananaRegex);
 
   if (match) {
     let prompt = match[1].trim();
 
-    // Safety: Limit prompt length to 600 characters to avoid URL length issues
-    if (prompt.length > 600) {
-      prompt = prompt.substring(0, 600);
+    // Safety: Limit prompt length to 800 characters
+    if (prompt.length > 800) {
+      prompt = prompt.substring(0, 800);
     }
 
     // Use pollinations.ai for real-time AI image generation
@@ -110,5 +112,5 @@ export function resolveNanobanana(text: string): string {
     return `https://pollinations.ai/p/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${seed}`;
   }
 
-  return text; // Return as is if it's already a URL or no tag found
+  return text;
 }
