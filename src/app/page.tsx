@@ -95,7 +95,7 @@ export default function Home() {
                   </div>
                 </Link>
                 <div className="space-y-4 flex-grow">
-                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Hacks</p>
+                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{post.category}</p>
                   <Link href={`/blog/${post.slug}`}>
                     <h4 className="text-2xl font-black text-slate-900 group-hover:text-blue-600 transition-colors leading-tight tracking-tight">
                       {post.title}
