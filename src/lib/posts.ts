@@ -92,16 +92,22 @@ export function searchPosts(query: string): PostData[] {
 export function resolveNanobanana(text: string): string {
   if (!text) return '';
 
-  // Regex to match [나노바나나: {prompt}] - more robust version
-  const nanobananaRegex = /\[나노바나나:\s*([\s\S]*?)\]/i;
+  // Flexible regex to handle spaces around colon and newlines inside brackets
+  const nanobananaRegex = /\[나노바나나\s*:\s*([\s\S]*?)\]/i;
   const match = text.match(nanobananaRegex);
 
   if (match) {
-    const prompt = match[1].trim();
-    // Use pollinations.ai to actually GENERATE the image based on the prompt
-    // This provides much better relevance than Picsum
+    let prompt = match[1].trim();
+
+    // Safety: Limit prompt length to 600 characters to avoid URL length issues
+    if (prompt.length > 600) {
+      prompt = prompt.substring(0, 600);
+    }
+
+    // Use pollinations.ai for real-time AI image generation
     const encodedPrompt = encodeURIComponent(prompt);
-    return `https://pollinations.ai/p/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
+    const seed = Math.floor(Math.random() * 1000000);
+    return `https://pollinations.ai/p/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${seed}`;
   }
 
   return text; // Return as is if it's already a URL or no tag found

@@ -48,7 +48,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
     };
 
     // Helper to render content with nanobanana tags as images
-    const processedContent = postData.content.replace(/\[나노바나나:\s*(.*?)\]/gi, (match) => {
+    const processedContent = postData.content.replace(/\[나노바나나\s*:\s*([\s\S]*?)\]/gi, (match) => {
         const imageUrl = resolveNanobanana(match);
         return `\n\n![Nanobanana Image](${imageUrl})\n\n`;
     });
