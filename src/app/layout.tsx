@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   authors: [{ name: "Ilsanggam Team" }],
   verification: {
     google: "google3019d64a5a71b97e",
+    other: {
+      "naver-site-verification": ["7b67d40bb0f551ce92c6af50b38975c1eb1fbb96"],
+    },
   },
   openGraph: {
     title: "Ilsanggam Life Studio | 최고의 생활 정보 저장소",
