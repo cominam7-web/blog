@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { resolveNanobanana as sharedResolveNanobanana } from './nanobanana';
 
 const postsDirectory = path.join(process.cwd(), 'src/posts');
 
@@ -14,6 +15,16 @@ export interface PostData {
   content: string;
 }
 
+function formatDate(date: any): string {
+  if (!date) return new Date().toISOString().split('T')[0];
+  try {
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+  } catch (e) {
+    return String(date);
+  }
+}
+
 export function getSortedPostsData() {
   if (!fs.existsSync(postsDirectory)) return [];
 
@@ -25,15 +36,13 @@ export function getSortedPostsData() {
       const fullPath = path.join(postsDirectory, fileName);
       let fileContents = fs.readFileSync(fullPath, 'utf8');
 
-      // Robust Parsing: Remove LLM pre-amble or code block wrappers
-      if (fileContents.includes('---')) {
-        const parts = fileContents.split('---');
-        // If there's text before the first ---, or it's wrapped in backticks
-        if (!fileContents.startsWith('---')) {
-          const firstSeparatorIndex = fileContents.indexOf('---');
-          fileContents = fileContents.substring(firstSeparatorIndex);
+      // Super Robust Parsing: Find the REAL YAML block starting with 'title:'
+      if (fileContents.includes('title:')) {
+        const startIndex = fileContents.search(/---[\s\S]*?title:/);
+        if (startIndex !== -1) {
+          fileContents = fileContents.substring(startIndex);
         }
-        // Remove code block backticks if any
+        // Remove code block backticks AFTER finding the start
         fileContents = fileContents.replace(/```markdown/gi, '').replace(/```/g, '').trim();
       }
 
@@ -42,7 +51,7 @@ export function getSortedPostsData() {
       return {
         slug,
         title: matterResult.data.title || slug,
-        date: matterResult.data.date || new Date().toISOString(),
+        date: formatDate(matterResult.data.date),
         excerpt: matterResult.data.excerpt || '',
         category: matterResult.data.category || 'Hacks',
         image: matterResult.data.image || '',
@@ -60,7 +69,6 @@ export function getSortedPostsData() {
 export function getPostData(slug: string): PostData {
   const fullPath = path.join(postsDirectory, `${slug}.md`);
 
-  // 파일이 없으면 에러를 던지기보다 기본 데이터를 반환해 빌드 중단을 방지할 수 있음 (또는 404 처리)
   if (!fs.existsSync(fullPath)) {
     return {
       slug,
@@ -75,11 +83,11 @@ export function getPostData(slug: string): PostData {
 
   let fileContents = fs.readFileSync(fullPath, 'utf8');
 
-  // Robust Parsing: Remove LLM pre-amble or code block wrappers
-  if (fileContents.includes('---')) {
-    const firstSeparatorIndex = fileContents.indexOf('---');
-    if (firstSeparatorIndex > 0) {
-      fileContents = fileContents.substring(firstSeparatorIndex);
+  // Super Robust Parsing: Find the REAL YAML block starting with 'title:'
+  if (fileContents.includes('title:')) {
+    const startIndex = fileContents.search(/---[\s\S]*?title:/);
+    if (startIndex !== -1) {
+      fileContents = fileContents.substring(startIndex);
     }
     fileContents = fileContents.replace(/```markdown/gi, '').replace(/```/g, '').trim();
   }
@@ -89,7 +97,7 @@ export function getPostData(slug: string): PostData {
   return {
     slug,
     title: matterResult.data.title || slug,
-    date: matterResult.data.date || '',
+    date: formatDate(matterResult.data.date),
     excerpt: matterResult.data.excerpt || '',
     category: matterResult.data.category || 'Hacks',
     image: matterResult.data.image || '',
@@ -102,7 +110,6 @@ export function searchPosts(query: string): PostData[] {
   const lowerQuery = query.toLowerCase();
 
   return allPosts.filter(post => {
-    // getPostData to get full content for search
     const fullPost = getPostData(post.slug);
     return (
       post.title.toLowerCase().includes(lowerQuery) ||
@@ -112,25 +119,6 @@ export function searchPosts(query: string): PostData[] {
   });
 }
 
-export function resolveNanobanana(text: string): string {
-  if (!text) return '';
-
-  // Bulletproof regex: matches anything starting with 'nano' or '나노' inside any kind of bracket
-  const nanobananaRegex = /[\[［][\s\S]*?(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]*?)[\]］]/i;
-  const match = text.match(nanobananaRegex);
-
-  if (match) {
-    let prompt = match[1].trim();
-
-    // Safety: Limit prompt length to 800 characters
-    if (prompt.length > 800) {
-      prompt = prompt.substring(0, 800);
-    }
-
-    const encodedPrompt = encodeURIComponent(prompt);
-    const seed = Math.floor(Math.random() * 1000000);
-    return `https://pollinations.ai/p/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${seed}`;
-  }
-
-  return text;
+export function resolveNanobanana(text: any): string {
+  return sharedResolveNanobanana(text);
 }

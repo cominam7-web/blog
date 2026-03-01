@@ -1,13 +1,8 @@
-'use client';
-
-import { useSearchParams } from 'next/navigation';
 import { searchPosts, resolveNanobanana } from '@/lib/posts';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-function SearchResults() {
-    const searchParams = useSearchParams();
-    const query = searchParams.get('q') || '';
+async function SearchResults({ query }: { query: string }) {
     const rawResults = query ? searchPosts(query) : [];
 
     // Resolve Nanobanana images for results
@@ -84,10 +79,17 @@ function SearchResults() {
     );
 }
 
-export default function SearchPage() {
+export default async function SearchPage({
+    searchParams
+}: {
+    searchParams: Promise<{ q: string }>
+}) {
+    const { q } = await searchParams;
+    const query = q || '';
+
     return (
         <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><span className="text-slate-400 font-black uppercase tracking-widest animate-pulse">Searching...</span></div>}>
-            <SearchResults />
+            <SearchResults query={query} />
         </Suspense>
     );
 }
