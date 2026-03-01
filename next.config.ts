@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
         pathname: '/api/generate-image',
       },
     ],
+    // Supabase Storage 이미지 허용 (관리자 업로드 이미지)
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'vjychsedpcbyocrtrdfd.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
   },
 };
 
