@@ -74,7 +74,11 @@ export async function PUT(
 
     const tagsArray = Array.isArray(tags) ? tags : (tags || '').split(',').map((t: string) => t.trim()).filter(Boolean);
     const imageField = imagePrompt ? `[나노바나나: ${imagePrompt}]` : '';
-    const dateStr = date || new Date().toISOString().split('T')[0];
+    let dateStr = new Date().toISOString().split('T')[0];
+    if (date) {
+        const parsed = new Date(date);
+        dateStr = isNaN(parsed.getTime()) ? dateStr : parsed.toISOString().split('T')[0];
+    }
 
     const mdContent = `---
 title: "${title.replace(/"/g, '\\"')}"
