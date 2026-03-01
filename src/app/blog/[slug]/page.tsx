@@ -80,7 +80,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
 
                 {/* Main Heading & Excerpt */}
                 <header className="text-center mb-10 pb-10 border-b border-dashed border-slate-300">
-                    <h1 className="text-4xl sm:text-6xl font-black text-slate-900 leading-[1.1] mb-8 tracking-tighter max-w-4xl mx-auto uppercase">
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-[1.2] mb-8 tracking-tighter max-w-4xl mx-auto uppercase">
                         {postData.title}
                     </h1>
                     <p className="text-xl sm:text-2xl text-slate-600 font-medium max-w-3xl mx-auto leading-relaxed italic mb-10">
@@ -121,6 +121,33 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     <div className="prose prose-slate prose-lg lg:prose-xl max-w-none prose-headings:text-slate-950 prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase prose-strong:text-slate-900 prose-a:text-blue-600">
                         <ReactMarkdown
                             components={{
+                                // 외부 링크: 새 탭으로 열기 + 버튼 스타일
+                                a: ({ node, href, children, ...props }) => {
+                                    const isExternal = href?.startsWith('http');
+                                    return (
+                                        <a
+                                            href={href}
+                                            target={isExternal ? '_blank' : undefined}
+                                            rel={isExternal ? 'noopener noreferrer' : undefined}
+                                            style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 600 }}
+                                            {...props}
+                                        >
+                                            {children}
+                                            {isExternal && (
+                                                <svg
+                                                    className="inline-block ml-1 mb-0.5"
+                                                    style={{ width: '0.8em', height: '0.8em' }}
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            )}
+                                        </a>
+                                    );
+                                },
+                                // 이미지: 나노바나나 AI 이미지
                                 img: ({ node, ...props }) => (
                                     <div className="my-12 bg-slate-50 border border-dashed border-slate-200 p-2 overflow-hidden group">
                                         <Image
