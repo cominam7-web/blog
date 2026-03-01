@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { adminFetch } from '@/lib/admin-fetch';
+import { getSupabase } from '@/lib/supabase';
 
 const CATEGORIES = ['Hacks', 'Tech', 'Entertainment', 'Health', 'Reviews', 'Deals', 'Best Picks'];
 
@@ -34,6 +35,9 @@ export default function PostEditor({ mode, initialData }: PostEditorProps) {
     const [saving, setSaving] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
     const [error, setError] = useState('');
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const handleSubmit = async () => {
         if (!title.trim() || !content.trim()) {
@@ -82,6 +86,57 @@ export default function PostEditor({ mode, initialData }: PostEditorProps) {
     const insertNanobanana = () => {
         const tag = '[나노바나나: watercolor illustration of , no text, no letters, no writing]';
         setContent(prev => prev + '\n\n' + tag);
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        setError('');
+
+        try {
+            const sb = getSupabase();
+            const { data } = await sb.auth.getSession();
+            const token = data.session?.access_token || '';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch('/api/admin/upload', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData,
+            });
+
+            const result = await res.json();
+
+            if (!res.ok) {
+                setError(result.error || 'Upload failed');
+                return;
+            }
+
+            const altText = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+            const markdownImg = `![${altText}](${result.url})`;
+
+            // Insert at cursor position or append
+            const textarea = textareaRef.current;
+            if (textarea && !showPreview) {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const before = content.slice(0, start);
+                const after = content.slice(end);
+                const newContent = before + '\n\n' + markdownImg + '\n\n' + after;
+                setContent(newContent);
+            } else {
+                setContent(prev => prev + '\n\n' + markdownImg);
+            }
+        } catch {
+            setError('Image upload failed');
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
     };
 
     return (
@@ -166,14 +221,30 @@ export default function PostEditor({ mode, initialData }: PostEditorProps) {
                             Preview
                         </button>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                         <button
                             onClick={insertNanobanana}
                             className="text-[11px] font-bold text-purple-600 hover:text-purple-800 transition-colors px-2 py-1"
                             title="Insert Nanobanana image tag"
                         >
-                            + Image Tag
+                            + AI Image
                         </button>
+                        <span className="text-slate-300">|</span>
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                            className="text-[11px] font-bold text-green-600 hover:text-green-800 transition-colors px-2 py-1 disabled:opacity-50"
+                            title="Upload image file"
+                        >
+                            {uploading ? 'Uploading...' : '+ Upload Image'}
+                        </button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                        />
                     </div>
                 </div>
 
@@ -185,6 +256,7 @@ export default function PostEditor({ mode, initialData }: PostEditorProps) {
                     </div>
                 ) : (
                     <textarea
+                        ref={textareaRef}
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="Write your post in Markdown..."
