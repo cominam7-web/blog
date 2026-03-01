@@ -214,11 +214,14 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </div>
                     )}
 
-                    {/* Related/Footer Info */}
+                    {/* Share & Footer Info */}
                     <div className="mt-8 pt-8 border-t-2 border-slate-900">
-                        <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            <span>End of Article</span>
-                            <Link href="/" className="text-blue-600 hover:underline">Back to Home</Link>
+                        <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">End of Article</span>
+                            <div className="flex items-center gap-4">
+                                <ShareButton />
+                                <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Back to Home</Link>
+                            </div>
                         </div>
                     </div>
 
