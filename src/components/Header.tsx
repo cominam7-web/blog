@@ -9,7 +9,7 @@ const categories = [
     { name: 'HACKS', korean: '생활팁', href: '/category/hacks' },
     { name: 'TECH', korean: '기술', href: '/category/tech' },
     { name: 'BEST PICKS', korean: '추천', href: '/category/best-picks' },
-    { name: 'ENTERTAINMENT', korean: '엔터', href: '/category/entertainment' },
+    { name: 'ENTERTAINMENT', korean: '엔터테인먼트', href: '/category/entertainment' },
     { name: 'HEALTH', korean: '건강', href: '/category/health' },
     { name: 'REVIEWS', korean: '리뷰', href: '/category/reviews' },
     { name: 'HOME & GARDEN', korean: '홈&가든', href: '/category/home-&-garden' },
@@ -271,12 +271,12 @@ export default function Header() {
 
                 {/* Sub-Navigation */}
                 <nav className="border-t border-b border-dashed border-slate-300 py-1 mb-2 overflow-x-auto no-scrollbar">
-                    <ul className="flex items-center min-w-max">
+                    <ul className="flex items-center justify-center min-w-max">
                         {categories.map((cat) => (
                             <li key={cat.name}>
                                 <Link
                                     href={cat.href}
-                                    className="text-[10px] sm:text-[11px] font-black tracking-widest text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors cursor-pointer flex flex-col items-center px-2 sm:px-4 py-2 leading-tight"
+                                    className="text-[10px] sm:text-[11px] font-black tracking-widest text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors cursor-pointer flex flex-col items-center text-center px-3 sm:px-4 py-2 leading-tight whitespace-nowrap"
                                 >
                                     <span>{cat.name}</span>
                                     <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 mt-0.5">

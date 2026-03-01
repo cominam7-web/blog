@@ -6,13 +6,19 @@ import { createClient } from '@supabase/supabase-js';
 // ISR: 1시간마다 재생성 → 조회수 변동 반영
 export const revalidate = 3600;
 
+// Supabase 클라이언트 생성 (서버 컴포넌트용)
+function getServerSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  if (!url || !key || !url.startsWith('http')) return null;
+  return createClient(url, key);
+}
+
 // Supabase에서 조회수 가장 높은 포스트 slug 조회
 async function getMostViewedSlug(): Promise<string | null> {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = getServerSupabase();
+    if (!supabase) return null;
     const { data, error } = await supabase
       .from('posts')
       .select('slug, views')
@@ -27,6 +33,38 @@ async function getMostViewedSlug(): Promise<string | null> {
   }
 }
 
+// 모든 포스트의 조회수 + 댓글 수 가져오기
+async function getAllPostStats(): Promise<Record<string, { views: number; comments: number }>> {
+  try {
+    const supabase = getServerSupabase();
+    if (!supabase) return {};
+
+    const [viewsResult, commentsResult] = await Promise.all([
+      supabase.from('posts').select('slug, views'),
+      supabase.from('comments').select('slug'),
+    ]);
+
+    const stats: Record<string, { views: number; comments: number }> = {};
+
+    if (viewsResult.data) {
+      for (const row of viewsResult.data) {
+        stats[row.slug] = { views: row.views ?? 0, comments: 0 };
+      }
+    }
+
+    if (commentsResult.data) {
+      for (const row of commentsResult.data) {
+        if (!stats[row.slug]) stats[row.slug] = { views: 0, comments: 0 };
+        stats[row.slug].comments++;
+      }
+    }
+
+    return stats;
+  } catch {
+    return {};
+  }
+}
+
 export default async function Home() {
   // MD 파일에서 전체 포스트 로드 (날짜 내림차순)
   const allPostsData = getSortedPostsData().map(post => ({
@@ -35,7 +73,10 @@ export default async function Home() {
   }));
 
   // Featured: 조회수 1위 글 (없으면 최신 글로 fallback)
-  const mostViewedSlug = await getMostViewedSlug();
+  const [mostViewedSlug, postStats] = await Promise.all([
+    getMostViewedSlug(),
+    getAllPostStats(),
+  ]);
   const featuredPost =
     (mostViewedSlug ? allPostsData.find(p => p.slug === mostViewedSlug) : null)
     ?? allPostsData[0];
@@ -78,8 +119,12 @@ export default async function Home() {
               <span>|</span>
               <span>{featuredPost.date}</span>
               <span>|</span>
+              <span className="flex items-center gap-1">
+                👁 {(postStats[featuredPost.slug]?.views ?? 0).toLocaleString()} Views
+              </span>
+              <span>|</span>
               <span className="flex items-center gap-1 hover:text-blue-600 cursor-pointer transition-colors">
-                💬 0 Comments
+                💬 {postStats[featuredPost.slug]?.comments ?? 0} Comments
               </span>
             </div>
 
@@ -144,7 +189,9 @@ export default async function Home() {
                 <div className="mt-6 flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span>{post.date}</span>
                   <span>•</span>
-                  <span>0 comments</span>
+                  <span>👁 {(postStats[post.slug]?.views ?? 0).toLocaleString()}</span>
+                  <span>•</span>
+                  <span>💬 {postStats[post.slug]?.comments ?? 0}</span>
                 </div>
               </article>
             ))}
