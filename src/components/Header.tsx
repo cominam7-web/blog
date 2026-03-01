@@ -426,10 +426,10 @@ export default function Header() {
                             <li key={cat.name}>
                                 <Link
                                     href={cat.href}
-                                    className="text-[10px] sm:text-[11px] font-black tracking-widest text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors cursor-pointer flex flex-col items-center text-center px-3 sm:px-4 py-2 leading-tight whitespace-nowrap"
+                                    className="text-[11px] sm:text-[13px] font-black tracking-widest text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors cursor-pointer flex flex-col items-center text-center px-3 sm:px-5 py-3 leading-tight whitespace-nowrap"
                                 >
                                     <span>{cat.name}</span>
-                                    <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 mt-0.5">
+                                    <span className="text-[9px] sm:text-[10px] font-medium text-slate-400 mt-0.5">
                                         {cat.korean}
                                     </span>
                                 </Link>
