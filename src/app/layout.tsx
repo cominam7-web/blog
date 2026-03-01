@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   description: "Ilsanggam Life Studio는 전문적인 생활 정보와 라이프스타일 팁을 AI 기술로 자동화하여 전달하는 프리미엄 블로그입니다.",
   keywords: ["Ilsanggam Life Studio", "생활 정보", "라이프스타일", "AI 블로그", "수익형 블로그"],
   authors: [{ name: "Ilsanggam Team" }],
+  verification: {
+    google: "google3019d64a5a71b97e",
+  },
   openGraph: {
     title: "Ilsanggam Life Studio | 최고의 생활 정보 저장소",
     description: "전문적인 생활 정보와 라이프스타일 팁을 제공하는 프리미엄 자동화 블로그",
