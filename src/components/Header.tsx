@@ -192,6 +192,61 @@ export default function Header() {
             </div>
         )}
 
+        {/* Fullscreen Menu Overlay - outside header to avoid backdrop-filter issue */}
+        {isMobileMenuOpen && (
+            <div className="fixed inset-0 z-[70] bg-white overflow-y-auto">
+                {/* Close Button */}
+                <div className="flex items-center justify-start p-5">
+                    <button
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="p-1 text-slate-900 hover:text-slate-500 transition-colors"
+                        aria-label="메뉴 닫기"
+                    >
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Search */}
+                <div className="px-6 pb-8">
+                    <form onSubmit={handleMobileSearch} className="flex items-center border-b-2 border-slate-300 pb-2">
+                        <input
+                            ref={mobileSearchRef}
+                            type="text"
+                            value={mobileSearchQuery}
+                            onChange={(e) => setMobileSearchQuery(e.target.value)}
+                            placeholder="Search ILSANGGAM"
+                            className="flex-grow bg-transparent border-none text-base font-medium text-slate-900 placeholder:text-slate-400 focus:ring-0 outline-none"
+                        />
+                        <button type="submit" className="text-slate-900 hover:text-slate-500 ml-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                {/* Category List */}
+                <nav className="px-6">
+                    <ul>
+                        {categories.map((cat) => (
+                            <li key={cat.name} className="border-b border-slate-200">
+                                <Link
+                                    href={cat.href}
+                                    className="flex items-center justify-between py-4 hover:text-slate-500 transition-colors group"
+                                >
+                                    <span className="text-[15px] font-black tracking-wider text-slate-900 uppercase group-hover:text-slate-500">
+                                        {cat.name}
+                                    </span>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+            </div>
+        )}
+
         <header className="bg-white/95 backdrop-blur-sm px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 sticky top-0 z-50 border-b border-slate-100">
             <div className="max-w-7xl mx-auto">
                 {/* Desktop Search Overlay */}
@@ -215,111 +270,6 @@ export default function Header() {
                                 </svg>
                             </button>
                         </form>
-                    </div>
-                )}
-
-                {/* Mobile Menu Overlay */}
-                {isMobileMenuOpen && (
-                    <div className="fixed inset-0 z-[70] flex">
-                        {/* Backdrop */}
-                        <div
-                            className="flex-1 bg-black/40 transition-opacity"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                        />
-                        {/* Side Panel */}
-                        <div className="bg-white w-full max-w-sm h-full overflow-y-auto shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-                            {/* Panel Header */}
-                            <div className="flex items-center justify-end p-4 border-b border-slate-100">
-                                <button
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* Mobile Search */}
-                            <div className="p-4 border-b border-slate-100">
-                                <form onSubmit={handleMobileSearch} className="flex items-center border border-slate-300 px-3 py-2">
-                                    <input
-                                        ref={mobileSearchRef}
-                                        type="text"
-                                        value={mobileSearchQuery}
-                                        onChange={(e) => setMobileSearchQuery(e.target.value)}
-                                        placeholder="Search Lifehacker"
-                                        className="flex-grow bg-transparent border-none text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:ring-0 outline-none"
-                                    />
-                                    <button type="submit" className="text-slate-400 hover:text-slate-900 ml-2">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                    </button>
-                                </form>
-                            </div>
-
-                            {/* Mobile Nav Categories */}
-                            <nav className="flex-1 py-2">
-                                <ul>
-                                    {categories.map((cat) => (
-                                        <li key={cat.name} className="border-b border-slate-50">
-                                            <Link
-                                                href={cat.href}
-                                                className="flex items-center justify-between py-3.5 px-6 hover:bg-slate-50 transition-colors group"
-                                            >
-                                                <span>
-                                                    <span className="text-[13px] font-black tracking-wider text-slate-900 uppercase block">
-                                                        {cat.name}
-                                                    </span>
-                                                    <span className="text-[11px] font-medium text-slate-400">
-                                                        {cat.korean}
-                                                    </span>
-                                                </span>
-                                                <svg
-                                                    className="w-4 h-4 text-slate-300 group-hover:text-slate-600 transition-colors"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                                                </svg>
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </nav>
-
-                            {/* Mobile Social Icons */}
-                            <div className="p-6 border-t border-slate-100">
-                                <div className="flex items-center gap-3">
-                                    {/* Instagram */}
-                                    <a href="#" className="w-9 h-9 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-900 transition-colors" aria-label="Instagram">
-                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                                        </svg>
-                                    </a>
-                                    {/* Facebook */}
-                                    <a href="#" className="w-9 h-9 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-900 transition-colors" aria-label="Facebook">
-                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                                        </svg>
-                                    </a>
-                                    {/* YouTube */}
-                                    <a href="#" className="w-9 h-9 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-900 transition-colors" aria-label="YouTube">
-                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z" />
-                                        </svg>
-                                    </a>
-                                    {/* X (Twitter) */}
-                                    <a href="#" className="w-9 h-9 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:border-slate-900 transition-colors" aria-label="X">
-                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 )}
 
