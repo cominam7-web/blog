@@ -1,14 +1,47 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getSortedPostsData, resolveNanobanana } from '@/lib/posts';
+import { createClient } from '@supabase/supabase-js';
 
-export default function Home() {
+// ISR: 1시간마다 재생성 → 조회수 변동 반영
+export const revalidate = 3600;
+
+// Supabase에서 조회수 가장 높은 포스트 slug 조회
+async function getMostViewedSlug(): Promise<string | null> {
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const { data, error } = await supabase
+      .from('posts')
+      .select('slug, views')
+      .order('views', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !data || (data.views ?? 0) === 0) return null;
+    return data.slug;
+  } catch {
+    return null;
+  }
+}
+
+export default async function Home() {
+  // MD 파일에서 전체 포스트 로드 (날짜 내림차순)
   const allPostsData = getSortedPostsData().map(post => ({
     ...post,
     image: resolveNanobanana(post.image)
   }));
-  const featuredPost = allPostsData[0];
-  const remainingPosts = allPostsData.slice(1);
+
+  // Featured: 조회수 1위 글 (없으면 최신 글로 fallback)
+  const mostViewedSlug = await getMostViewedSlug();
+  const featuredPost =
+    (mostViewedSlug ? allPostsData.find(p => p.slug === mostViewedSlug) : null)
+    ?? allPostsData[0];
+
+  // Latest Stories: 날짜 내림차순 (가장 최근 글이 맨 왼쪽), featured 제외
+  const remainingPosts = allPostsData.filter(p => p.slug !== featuredPost?.slug);
 
   return (
     <main className="min-h-screen bg-white">
@@ -72,7 +105,7 @@ export default function Home() {
           </section>
         )}
 
-        {/* Grid Section */}
+        {/* Latest Stories Grid - 날짜 내림차순 (왼쪽 = 최신) */}
         <section>
           <div className="flex items-center justify-between mb-12 border-b-2 border-slate-900 pb-2">
             <h3 className="text-lg font-black tracking-tighter text-slate-900 uppercase">Latest Stories</h3>

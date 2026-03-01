@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import ViewTracker from '@/components/ViewTracker';
 
 export async function generateStaticParams() {
     const posts = getSortedPostsData();
@@ -58,6 +59,8 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
 
     return (
         <article className="min-h-screen bg-white">
+            {/* 조회수 자동 기록 (클라이언트, 세션당 1회) */}
+            <ViewTracker slug={slug} />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 {/* Top Breadcrumb & Share Section */}
                 <div className="flex items-center justify-center gap-2 text-[10px] font-black tracking-widest mb-6 uppercase">
