@@ -62,6 +62,17 @@ export async function createOrUpdateFile(
     return { success: true };
 }
 
+export async function getFileContent(filePath: string): Promise<string | null> {
+    const { owner, repo, branch } = getConfig();
+    const res = await githubFetch(
+        `/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.content) return null;
+    return Buffer.from(data.content, 'base64').toString('utf-8');
+}
+
 export async function deleteFile(
     filePath: string,
     sha: string,

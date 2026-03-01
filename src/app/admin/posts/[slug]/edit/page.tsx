@@ -1,51 +1,46 @@
-import { getSortedPostsData, getPostData } from '@/lib/posts';
-import { notFound } from 'next/navigation';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import PostEditor from '@/components/admin/PostEditor';
+import { adminFetch } from '@/lib/admin-fetch';
 
-export async function generateStaticParams() {
-    const posts = getSortedPostsData();
-    return posts.map((post) => ({ slug: post.slug }));
-}
+export default function EditPostPage() {
+    const params = useParams();
+    const slug = params.slug as string;
+    const [initialData, setInitialData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-function extractImagePrompt(imageField: any): string {
-    if (!imageField) return '';
+    useEffect(() => {
+        adminFetch(`/api/admin/posts/${slug}`)
+            .then(async (res) => {
+                if (!res.ok) {
+                    setError('Post not found');
+                    return;
+                }
+                const data = await res.json();
+                setInitialData(data);
+            })
+            .catch(() => setError('Failed to load post'))
+            .finally(() => setLoading(false));
+    }, [slug]);
 
-    let input = '';
-    if (Array.isArray(imageField)) {
-        const first = imageField[0];
-        if (first !== null && typeof first === 'object') {
-            const entries = Object.entries(first as Record<string, unknown>);
-            input = entries.length > 0 ? String(entries[0][1] || '') : '';
-        } else {
-            input = String(first || '');
-        }
-    } else {
-        input = String(imageField);
+    if (loading) {
+        return (
+            <div className="p-8">
+                <p className="text-slate-400 text-sm">Loading post from GitHub...</p>
+            </div>
+        );
     }
 
-    // Extract prompt from [나노바나나: prompt] syntax
-    const match = input.match(/(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]+?)(?=[\]］]|$)/i);
-    return match ? match[1].trim() : input.replace(/[\[\]［］]/g, '').trim();
-}
-
-export default async function EditPostPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
-    const post = getPostData(slug);
-
-    if (!post) {
-        notFound();
+    if (error || !initialData) {
+        return (
+            <div className="p-8">
+                <p className="text-red-500 text-sm">{error || 'Post not found'}</p>
+            </div>
+        );
     }
-
-    const initialData = {
-        slug: post.slug,
-        title: post.title,
-        date: post.date,
-        excerpt: post.excerpt,
-        category: post.category,
-        tags: post.tags,
-        imagePrompt: extractImagePrompt(post.image),
-        content: post.content,
-    };
 
     return (
         <div className="p-8">

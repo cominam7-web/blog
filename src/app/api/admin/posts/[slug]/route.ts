@@ -1,7 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { verifyAdmin, getServiceSupabase } from '@/lib/admin-auth';
-import { getFileSha, createOrUpdateFile, deleteFile } from '@/lib/github';
+import { getFileSha, getFileContent, createOrUpdateFile, deleteFile } from '@/lib/github';
+import matter from 'gray-matter';
+
+export async function GET(
+    _request: NextRequest,
+    { params }: { params: Promise<{ slug: string }> }
+) {
+    const auth = await verifyAdmin();
+    if (!auth.authorized) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { slug } = await params;
+    const filePath = `src/posts/${slug}.md`;
+    const rawContent = await getFileContent(filePath);
+
+    if (!rawContent) {
+        return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    }
+
+    const { data: frontmatter, content } = matter(rawContent);
+
+    // Extract image prompt from parsed image field
+    let imagePrompt = '';
+    const img = frontmatter.image;
+    if (img) {
+        let input = '';
+        if (Array.isArray(img)) {
+            const first = img[0];
+            if (first !== null && typeof first === 'object') {
+                const entries = Object.entries(first as Record<string, unknown>);
+                input = entries.length > 0 ? String(entries[0][1] || '') : '';
+            } else {
+                input = String(first || '');
+            }
+        } else {
+            input = String(img);
+        }
+        const match = input.match(/(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]+?)(?=[\]］]|$)/i);
+        imagePrompt = match ? match[1].trim() : input.replace(/[\[\]［］]/g, '').trim();
+    }
+
+    return NextResponse.json({
+        slug,
+        title: frontmatter.title || slug,
+        date: frontmatter.date ? String(frontmatter.date).split('T')[0] : '',
+        excerpt: frontmatter.excerpt || '',
+        category: frontmatter.category || 'Hacks',
+        tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
+        imagePrompt,
+        content: content.trim(),
+    });
+}
 
 export async function PUT(
     request: NextRequest,
