@@ -3,7 +3,8 @@ import path from 'path';
 import matter from 'gray-matter';
 import { resolveNanobanana as sharedResolveNanobanana } from './nanobanana';
 
-const postsDirectory = path.join(process.cwd(), 'src/posts');
+// CRITICAL: Use process.cwd() mixed with absolute path logic to ensure build-time stability
+const postsDirectory = path.resolve(process.cwd(), 'src', 'posts');
 
 export interface PostData {
   slug: string;
@@ -26,7 +27,10 @@ function formatDate(date: any): string {
 }
 
 export function getSortedPostsData() {
-  if (!fs.existsSync(postsDirectory)) return [];
+  if (!fs.existsSync(postsDirectory)) {
+    console.error(`Posts directory not found: ${postsDirectory}`);
+    return [];
+  }
 
   const fileNames = fs.readdirSync(postsDirectory);
   const allPostsData = fileNames
@@ -42,7 +46,6 @@ export function getSortedPostsData() {
         if (startIndex !== -1) {
           fileContents = fileContents.substring(startIndex);
         }
-        // Remove code block backticks AFTER finding the start
         fileContents = fileContents.replace(/```markdown/gi, '').replace(/```/g, '').trim();
       }
 
@@ -83,7 +86,6 @@ export function getPostData(slug: string): PostData {
 
   let fileContents = fs.readFileSync(fullPath, 'utf8');
 
-  // Super Robust Parsing: Find the REAL YAML block starting with 'title:'
   if (fileContents.includes('title:')) {
     const startIndex = fileContents.search(/---[\s\S]*?title:/);
     if (startIndex !== -1) {
