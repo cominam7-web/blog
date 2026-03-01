@@ -16,16 +16,26 @@ export function resolveNanobanana(text: any): string {
 
     if (match) {
         let prompt = match[1].trim();
+        return generateImageUrl(prompt);
+    }
 
-        // Safety: Limit prompt length to 800 characters
-        if (prompt.length > 800) {
-            prompt = prompt.substring(0, 800);
-        }
-
-        const encodedPrompt = encodeURIComponent(prompt);
-        const seed = Math.floor(Math.random() * 1000000);
-        return `https://pollinations.ai/p/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${seed}`;
+    // New: If no match but the text looks like a prompt (long enough), treat as prompt
+    const cleanedText = text.trim();
+    if (cleanedText.length > 20 && !cleanedText.startsWith('http')) {
+        return generateImageUrl(cleanedText);
     }
 
     return text;
+}
+
+function generateImageUrl(prompt: string): string {
+    // Safety: Limit prompt length to 1000 characters
+    let safePrompt = prompt.replace(/[\[\]]/g, '').trim();
+    if (safePrompt.length > 1000) {
+        safePrompt = safePrompt.substring(0, 1000);
+    }
+
+    const encodedPrompt = encodeURIComponent(safePrompt);
+    const seed = Math.floor(Math.random() * 1000000);
+    return `https://pollinations.ai/p/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${seed}`;
 }
