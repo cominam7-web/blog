@@ -118,6 +118,14 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     <div className="prose prose-slate prose-lg lg:prose-xl max-w-none prose-headings:text-slate-950 prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase prose-strong:text-slate-900 prose-a:text-blue-600">
                         <ReactMarkdown
                             components={{
+                                // p 안에 img가 있으면 div로 교체 (하이드레이션 에러 방지)
+                                p: ({ node, children, ...props }) => {
+                                    const hasImage = (node?.children ?? []).some(
+                                        (child: any) => child.tagName === 'img'
+                                    );
+                                    if (hasImage) return <div {...props}>{children}</div>;
+                                    return <p {...props}>{children}</p>;
+                                },
                                 // 외부 링크: 새 탭으로 열기 + 버튼 스타일
                                 a: ({ node, href, children, ...props }) => {
                                     const isExternal = href?.startsWith('http');

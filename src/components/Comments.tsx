@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
 interface Comment {
@@ -30,7 +30,7 @@ export default function Comments({ slug }: { slug: string }) {
     const [signupSuccess, setSignupSuccess] = useState(false);
 
     const fetchComments = useCallback(async () => {
-        const { data, count } = await supabase
+        const { data, count } = await getSupabase()
             .from('comments')
             .select('id, user_id, user_name, content, created_at', { count: 'exact' })
             .eq('slug', slug)
@@ -42,16 +42,17 @@ export default function Comments({ slug }: { slug: string }) {
     }, [slug]);
 
     const fetchViews = useCallback(async () => {
-        const { data } = await supabase.from('posts').select('views').eq('slug', slug).single();
+        const { data } = await getSupabase().from('posts').select('views').eq('slug', slug).single();
         if (data) setViews(data.views ?? 0);
     }, [slug]);
 
     // Auth state
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        const sb = getSupabase();
+        sb.auth.getSession().then(({ data: { session } }) => {
             setUser(session?.user ?? null);
         });
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
         });
         return () => subscription.unsubscribe();
@@ -66,7 +67,7 @@ export default function Comments({ slug }: { slug: string }) {
         e.preventDefault();
         setAuthError('');
         setAuthLoading(true);
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await getSupabase().auth.signInWithPassword({ email, password });
         setAuthLoading(false);
         if (error) {
             setAuthError(
@@ -85,7 +86,7 @@ export default function Comments({ slug }: { slug: string }) {
         e.preventDefault();
         setAuthError('');
         setAuthLoading(true);
-        const { error } = await supabase.auth.signUp({
+        const { error } = await getSupabase().auth.signUp({
             email,
             password,
             options: { data: { display_name: displayName } },
@@ -99,12 +100,12 @@ export default function Comments({ slug }: { slug: string }) {
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
+        await getSupabase().auth.signOut();
     };
 
     const handleDeleteComment = async (commentId: string) => {
         if (!confirm('댓글을 삭제하시겠습니까?')) return;
-        await supabase.from('comments').delete().eq('id', commentId).eq('user_id', user?.id ?? '');
+        await getSupabase().from('comments').delete().eq('id', commentId).eq('user_id', user?.id ?? '');
         fetchComments();
     };
 
@@ -112,7 +113,7 @@ export default function Comments({ slug }: { slug: string }) {
         e.preventDefault();
         if (!user || !newComment.trim()) return;
         setPosting(true);
-        const { error } = await supabase.from('comments').insert({
+        const { error } = await getSupabase().from('comments').insert({
             slug,
             user_id: user.id,
             user_email: user.email ?? '',

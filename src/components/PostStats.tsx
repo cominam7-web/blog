@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 export default function PostStats({ slug }: { slug: string }) {
     const [views, setViews] = useState<number>(0);
     const [commentCount, setCommentCount] = useState<number>(0);
 
     useEffect(() => {
+        const supabase = getSupabase();
         supabase
             .from('posts')
             .select('views')
