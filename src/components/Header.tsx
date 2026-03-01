@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { getSupabase } from '@/lib/supabase';
+import type { User } from '@supabase/supabase-js';
 
 const categories = [
     { name: 'LATEST', korean: '최신글', href: '/' },
@@ -22,10 +24,29 @@ export default function Header() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [mobileSearchQuery, setMobileSearchQuery] = useState('');
+    const [user, setUser] = useState<User | null>(null);
+    const [showAuthModal, setShowAuthModal] = useState<'login' | 'signup' | null>(null);
+    const [authEmail, setAuthEmail] = useState('');
+    const [authPassword, setAuthPassword] = useState('');
+    const [authDisplayName, setAuthDisplayName] = useState('');
+    const [authError, setAuthError] = useState('');
+    const [authLoading, setAuthLoading] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const mobileSearchRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
     const pathname = usePathname();
+
+    // Auth state listener
+    useEffect(() => {
+        const sb = getSupabase();
+        sb.auth.getSession().then(({ data: { session } }) => {
+            setUser(session?.user ?? null);
+        });
+        const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+        return () => subscription.unsubscribe();
+    }, []);
 
     useEffect(() => {
         if (isSearchOpen && searchInputRef.current) {
@@ -47,6 +68,58 @@ export default function Header() {
     useEffect(() => {
         setIsMobileMenuOpen(false);
     }, [pathname]);
+
+    const getUserDisplayName = (u: User) =>
+        u.user_metadata?.display_name || u.email?.split('@')[0] || 'User';
+
+    const handleAuthSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setAuthError('');
+        setAuthLoading(true);
+        const sb = getSupabase();
+
+        if (showAuthModal === 'login') {
+            const { error } = await sb.auth.signInWithPassword({ email: authEmail, password: authPassword });
+            if (error) {
+                setAuthError(error.message === 'Invalid login credentials'
+                    ? '이메일 또는 비밀번호가 올바르지 않습니다.'
+                    : error.message === 'Email not confirmed'
+                    ? '이메일 인증이 필요합니다. 이메일을 확인해주세요.'
+                    : error.message);
+            } else {
+                closeAuthModal();
+            }
+        } else {
+            const { error } = await sb.auth.signUp({
+                email: authEmail,
+                password: authPassword,
+                options: { data: { display_name: authDisplayName } },
+            });
+            if (error) {
+                setAuthError(error.message);
+            } else {
+                setAuthError('');
+                setShowAuthModal('login');
+                setAuthEmail('');
+                setAuthPassword('');
+                setAuthDisplayName('');
+                alert('가입 완료! 로그인해주세요.');
+            }
+        }
+        setAuthLoading(false);
+    };
+
+    const handleLogout = async () => {
+        await getSupabase().auth.signOut();
+    };
+
+    const closeAuthModal = () => {
+        setShowAuthModal(null);
+        setAuthError('');
+        setAuthEmail('');
+        setAuthPassword('');
+        setAuthDisplayName('');
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -198,6 +271,59 @@ export default function Header() {
                     </div>
                 )}
 
+                {/* Auth Modal */}
+                {showAuthModal && (
+                    <div
+                        className="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4"
+                        onClick={(e) => { if (e.target === e.currentTarget) closeAuthModal(); }}
+                    >
+                        <div className="bg-white border-2 border-slate-900 p-8 w-full max-w-sm">
+                            <div className="flex items-center justify-between mb-6">
+                                <h4 className="text-xl font-black tracking-tighter text-slate-900 uppercase">
+                                    {showAuthModal === 'login' ? 'Log In' : 'Sign Up'}
+                                </h4>
+                                <button onClick={closeAuthModal} className="text-slate-400 hover:text-slate-900 transition-colors">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <form onSubmit={handleAuthSubmit} className="space-y-4">
+                                {showAuthModal === 'signup' && (
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">닉네임 *</label>
+                                        <input type="text" value={authDisplayName} onChange={(e) => setAuthDisplayName(e.target.value)} required
+                                            className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="표시될 이름" />
+                                    </div>
+                                )}
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">이메일 *</label>
+                                    <input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required
+                                        className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="email@example.com" />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">비밀번호 *</label>
+                                    <input type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required minLength={6}
+                                        className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="최소 6자" />
+                                </div>
+                                {authError && (
+                                    <p className="text-red-500 text-sm font-medium bg-red-50 px-3 py-2 border border-red-100">{authError}</p>
+                                )}
+                                <button type="submit" disabled={authLoading}
+                                    className="w-full py-3 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest hover:bg-slate-700 transition-colors disabled:opacity-50">
+                                    {authLoading ? '처리 중...' : showAuthModal === 'login' ? 'Log In' : 'Sign Up'}
+                                </button>
+                                <button type="button" onClick={() => {
+                                    setShowAuthModal(showAuthModal === 'login' ? 'signup' : 'login');
+                                    setAuthError('');
+                                }} className="w-full text-center text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors py-1">
+                                    {showAuthModal === 'login' ? '계정이 없으신가요? → 회원가입' : '이미 계정이 있으신가요? → 로그인'}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
                 {/* Top Section */}
                 <div className="flex justify-between items-center pb-4 sm:pb-6">
                     {/* Logo */}
@@ -217,6 +343,30 @@ export default function Header() {
 
                     {/* Right Icons */}
                     <div className="flex items-center gap-3 sm:gap-6 text-slate-900 ml-4">
+                        {/* Auth Buttons / User Info */}
+                        {user ? (
+                            <div className="flex items-center gap-2 text-[11px] font-bold">
+                                <span className="hidden sm:inline text-slate-700">
+                                    {getUserDisplayName(user)}
+                                </span>
+                                <button onClick={handleLogout} className="text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest">
+                                    로그아웃
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 text-[11px] font-bold">
+                                <button onClick={() => setShowAuthModal('login')} className="text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-widest">
+                                    로그인
+                                </button>
+                                <span className="text-slate-300">|</span>
+                                <button onClick={() => setShowAuthModal('signup')} className="text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest">
+                                    회원가입
+                                </button>
+                            </div>
+                        )}
+
+                        <div className="h-6 w-[1px] bg-slate-200"></div>
+
                         {/* Desktop Social Icons */}
                         <div className="hidden md:flex items-center gap-3">
                             <a href="#" className="w-7 h-7 border-2 border-slate-900 rounded-full flex items-center justify-center hover:bg-slate-900 hover:text-white transition-colors" aria-label="Instagram">
