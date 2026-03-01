@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import { adminFetch } from '@/lib/admin-fetch';
 
 const CATEGORIES = ['Hacks', 'Tech', 'Entertainment', 'Health', 'Reviews', 'Deals', 'Best Picks'];
 
@@ -58,9 +59,8 @@ export default function PostEditor({ mode, initialData }: PostEditorProps) {
                 ? '/api/admin/posts'
                 : `/api/admin/posts/${initialData!.slug}`;
 
-            const res = await fetch(url, {
+            const res = await adminFetch(url, {
                 method: mode === 'create' ? 'POST' : 'PUT',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
 

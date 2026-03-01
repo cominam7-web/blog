@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface Post {
     slug: string;
@@ -21,7 +22,7 @@ export default function AdminPostsPage() {
     const router = useRouter();
 
     useEffect(() => {
-        fetch('/api/admin/posts')
+        adminFetch('/api/admin/posts')
             .then(r => r.json())
             .then(d => setPosts(d.posts || []))
             .catch(console.error)
@@ -33,7 +34,7 @@ export default function AdminPostsPage() {
 
         setDeleting(slug);
         try {
-            const res = await fetch(`/api/admin/posts/${slug}`, { method: 'DELETE' });
+            const res = await adminFetch(`/api/admin/posts/${slug}`, { method: 'DELETE' });
             if (res.ok) {
                 setPosts(prev => prev.filter(p => p.slug !== slug));
             } else {

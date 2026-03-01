@@ -1,14 +1,22 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
+import { headers } from 'next/headers';
 
 export async function verifyAdmin(): Promise<{ authorized: boolean; userId?: string; email?: string }> {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
+    const headersList = await headers();
+    const authHeader = headersList.get('authorization');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return { authorized: false };
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
-            cookies: {
-                getAll: () => cookieStore.getAll(),
+            global: {
+                headers: { Authorization: `Bearer ${token}` },
             },
         }
     );
@@ -23,7 +31,6 @@ export async function verifyAdmin(): Promise<{ authorized: boolean; userId?: str
 }
 
 export function getServiceSupabase() {
-    const { createClient } = require('@supabase/supabase-js');
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

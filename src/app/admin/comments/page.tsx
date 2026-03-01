@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface Comment {
     id: string;
@@ -18,7 +19,7 @@ export default function AdminCommentsPage() {
     const [deleting, setDeleting] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('/api/admin/comments')
+        adminFetch('/api/admin/comments')
             .then(r => r.json())
             .then(d => setComments(d.comments || []))
             .catch(console.error)
@@ -30,7 +31,7 @@ export default function AdminCommentsPage() {
 
         setDeleting(id);
         try {
-            const res = await fetch(`/api/admin/comments/${id}`, { method: 'DELETE' });
+            const res = await adminFetch(`/api/admin/comments/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 setComments(prev => prev.filter(c => c.id !== id));
             } else {
