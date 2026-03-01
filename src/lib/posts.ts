@@ -23,7 +23,20 @@ export function getSortedPostsData() {
     .map((fileName) => {
       const slug = fileName.replace(/\.md$/, '');
       const fullPath = path.join(postsDirectory, fileName);
-      const fileContents = fs.readFileSync(fullPath, 'utf8');
+      let fileContents = fs.readFileSync(fullPath, 'utf8');
+
+      // Robust Parsing: Remove LLM pre-amble or code block wrappers
+      if (fileContents.includes('---')) {
+        const parts = fileContents.split('---');
+        // If there's text before the first ---, or it's wrapped in backticks
+        if (!fileContents.startsWith('---')) {
+          const firstSeparatorIndex = fileContents.indexOf('---');
+          fileContents = fileContents.substring(firstSeparatorIndex);
+        }
+        // Remove code block backticks if any
+        fileContents = fileContents.replace(/```markdown/gi, '').replace(/```/g, '').trim();
+      }
+
       const matterResult = matter(fileContents);
 
       return {
@@ -60,7 +73,17 @@ export function getPostData(slug: string): PostData {
     };
   }
 
-  const fileContents = fs.readFileSync(fullPath, 'utf8');
+  let fileContents = fs.readFileSync(fullPath, 'utf8');
+
+  // Robust Parsing: Remove LLM pre-amble or code block wrappers
+  if (fileContents.includes('---')) {
+    const firstSeparatorIndex = fileContents.indexOf('---');
+    if (firstSeparatorIndex > 0) {
+      fileContents = fileContents.substring(firstSeparatorIndex);
+    }
+    fileContents = fileContents.replace(/```markdown/gi, '').replace(/```/g, '').trim();
+  }
+
   const matterResult = matter(fileContents);
 
   return {
