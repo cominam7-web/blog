@@ -54,12 +54,15 @@ export default function Header() {
 
     useEffect(() => {
         if (isMobileMenuOpen) {
+            const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
             document.body.style.overflow = 'hidden';
+            document.body.style.paddingRight = `${scrollbarWidth}px`;
             setTimeout(() => mobileSearchRef.current?.focus(), 300);
         } else {
             document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
         }
-        return () => { document.body.style.overflow = ''; };
+        return () => { document.body.style.overflow = ''; document.body.style.paddingRight = ''; };
     }, [isMobileMenuOpen]);
 
     // Close mobile menu on route change
@@ -194,7 +197,7 @@ export default function Header() {
 
         {/* Fullscreen Menu Overlay - outside header to avoid backdrop-filter issue */}
         {isMobileMenuOpen && (
-            <div className="fixed inset-0 z-[70] bg-white overflow-y-auto">
+            <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
                 {/* Close Button */}
                 <div className="flex items-center justify-start p-5">
                     <button
