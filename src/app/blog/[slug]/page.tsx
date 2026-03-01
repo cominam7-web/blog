@@ -1,6 +1,7 @@
 import { getPostData, getSortedPostsData } from '@/lib/posts';
 import { resolveNanobanana, NANOBANANA_REGEX } from '@/lib/nanobanana';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 
@@ -37,8 +38,9 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
     const { slug } = await params;
     const rawPostData = getPostData(slug);
 
+    // getPostData가 null을 반환하면 Next.js 404 페이지로 이동 (never를 반환하므로 TS 타입 추론 정상)
     if (!rawPostData) {
-        notFound();
+        return notFound();
     }
 
     // Resolve Nanobanana images
@@ -102,11 +104,13 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                 {/* Main Content Area */}
                 <div className="max-w-3xl mx-auto">
                     {postData.image && (
-                        <div className="mb-12 aspect-[16/9] overflow-hidden rounded-sm bg-slate-100">
-                            <img
+                        <div className="relative mb-12 aspect-[16/9] overflow-hidden rounded-sm bg-slate-100">
+                            <Image
                                 src={postData.image}
                                 alt={postData.title}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 100vw, 800px"
                             />
                         </div>
                     )}
@@ -116,10 +120,12 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                             components={{
                                 img: ({ node, ...props }) => (
                                     <div className="my-12 bg-slate-50 border border-dashed border-slate-200 p-2 overflow-hidden group">
-                                        <img
-                                            className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-700"
-                                            {...props}
+                                        <Image
+                                            src={props.src || ''}
                                             alt={props.alt || 'Nanobanana Content Image'}
+                                            width={1200}
+                                            height={630}
+                                            className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-700"
                                         />
                                         {props.alt && props.alt !== 'Nanobanana Image' && (
                                             <p className="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 italic">

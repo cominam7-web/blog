@@ -3,10 +3,18 @@ export const NANOBANANA_REGEX = /[\[［][\s\S]*?(?:나노|nano)[\s\S]*?[:：\-\s
 export function resolveNanobanana(text: any): string {
     if (!text) return '';
 
-    // Convert input to string and handle array case (common with gray-matter YAML)
+    // YAML에서 [나노바나나: prompt] 구문은 flow sequence로 파싱됨
+    // 예: [{ '나노바나나': 'prompt text' }] 형태가 되므로 재조립 필요
     let input = '';
     if (Array.isArray(text)) {
-        input = String(text[0] || '');
+        const first = text[0];
+        if (first !== null && typeof first === 'object') {
+            // YAML이 { '나노바나나': 'prompt' } 객체로 파싱한 경우 → 태그 문자열로 재조립
+            const entries = Object.entries(first as Record<string, unknown>);
+            input = entries.length > 0 ? `[${entries[0][0]}: ${entries[0][1]}]` : '';
+        } else {
+            input = String(first || '');
+        }
     } else {
         input = String(text);
     }
@@ -14,7 +22,6 @@ export function resolveNanobanana(text: any): string {
     if (!input.trim()) return '';
 
     // Step 1: Extract prompt using a very flexible regex
-    // This handles both [나노바나나: prompt] and just "나노바나나: prompt" (if brackets were stripped)
     const extractRegex = /(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]+?)(?=[\]］]|$)/i;
     const match = input.match(extractRegex);
 
@@ -22,16 +29,13 @@ export function resolveNanobanana(text: any): string {
     if (match && match[1]) {
         prompt = match[1].trim();
     } else if (input.length > 15 && !input.startsWith('http')) {
-        // Fallback: If no tag found but string is long and not a URL, treat as raw prompt
         prompt = input.replace(/[\[\]［］]/g, '').trim();
     }
 
     if (prompt) {
-        // Step 2: Final cleanup of the prompt
-        // Remove common artifacts and leftover prefixes
         let cleanPrompt = prompt
-            .replace(/^(?:나노|nano)[\s\S]*?[:：\-\s]\s*/i, '') // Remove prefix if still there
-            .replace(/[\[\]]/g, '') // Ensure no brackets
+            .replace(/^(?:나노|nano)[\s\S]*?[:：\-\s]\s*/i, '')
+            .replace(/[\[\]]/g, '')
             .trim();
 
         if (cleanPrompt) {
@@ -43,11 +47,7 @@ export function resolveNanobanana(text: any): string {
 }
 
 function generateImageUrl(prompt: string): string {
-    // Safety: Limit prompt length and ensure valid encoding
-    let safePrompt = prompt.substring(0, 1000).trim();
-    const encodedPrompt = encodeURIComponent(safePrompt);
-    const seed = Math.floor(Math.random() * 1000000);
-
-    // Using image.pollinations.ai for better compatibility
-    return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${seed}`;
+    const safePrompt = prompt.slice(0, 1000).trim();
+    // Gemini Imagen 3 API를 통한 AI 이미지 생성 (서버사이드 API 라우트)
+    return `/api/generate-image?prompt=${encodeURIComponent(safePrompt)}`;
 }

@@ -1,9 +1,10 @@
 import { MetadataRoute } from 'next'
 import { getSortedPostsData } from '@/lib/posts'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blog.example.com'
+
 export default function sitemap(): MetadataRoute.Sitemap {
     const posts = getSortedPostsData()
-    const baseUrl = 'https://blog.example.com' // 실 배포 주소로 변경 필요
 
     const postUrls = posts.map((post) => ({
         url: `${baseUrl}/blog/${post.slug}`,

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getSortedPostsData, resolveNanobanana } from '@/lib/posts';
 
 export default function Home() {
@@ -52,19 +53,21 @@ export default function Home() {
             </div>
 
             <Link href={`/blog/${featuredPost.slug}`} className="block group relative overflow-hidden rounded-sm bg-slate-100 aspect-[21/9] border border-slate-100 mb-10">
-              <div className="w-full h-full bg-slate-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-700">
-                {featuredPost.image ? (
-                  <img
-                    src={featuredPost.image}
-                    alt={featuredPost.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
+              {featuredPost.image ? (
+                <Image
+                  src={featuredPost.image}
+                  alt={featuredPost.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 768px) 100vw, 80vw"
+                />
+              ) : (
+                <div className="w-full h-full bg-slate-50 flex items-center justify-center">
                   <svg className="w-24 h-24 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                )}
-              </div>
+                </div>
+              )}
             </Link>
           </section>
         )}
@@ -79,20 +82,22 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
             {remainingPosts.map((post) => (
               <article key={post.slug} className="group border-b border-dashed border-slate-200 pb-12 last:border-0 h-full flex flex-col">
-                <Link href={`/blog/${post.slug}`} className="mb-6 block overflow-hidden aspect-video bg-slate-50 rounded-sm">
-                  <div className="w-full h-full flex items-center justify-center text-slate-200 group-hover:scale-105 transition-transform duration-500">
-                    {post.image ? (
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
+                <Link href={`/blog/${post.slug}`} className="relative mb-6 block overflow-hidden aspect-video bg-slate-50 rounded-sm">
+                  {post.image ? (
+                    <Image
+                      src={post.image}
+                      alt={post.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-200 group-hover:scale-105 transition-transform duration-500">
                       <svg className="w-12 h-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </Link>
                 <div className="space-y-4 flex-grow">
                   <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{post.category}</p>

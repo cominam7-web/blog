@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next'
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blog.example.com'
+
 export default function robots(): MetadataRoute.Robots {
     return {
         rules: {
@@ -7,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: '/private/',
         },
-        sitemap: 'https://blog.example.com/sitemap.xml', // 실 배포 주소로 변경 필요
+        sitemap: `${baseUrl}/sitemap.xml`,
     }
 }
