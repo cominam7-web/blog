@@ -92,11 +92,8 @@ export function searchPosts(query: string): PostData[] {
 export function resolveNanobanana(text: string): string {
   if (!text) return '';
 
-  // Ultimate flexible regex: 
-  // Brackets: [ ] or ［ ］
-  // Keywords: 나노바나나, 나노 바나나, Nanobanana
-  // Separators: : ： - or just space
-  const nanobananaRegex = /[\[［](?:나노\s*바나나|Nanobanana)\s*[:：\-\s]\s*([\s\S]*?)[\]］]/i;
+  // Bulletproof regex: matches anything starting with 'nano' or '나노' inside any kind of bracket
+  const nanobananaRegex = /[\[［][\s\S]*?(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]*?)[\]］]/i;
   const match = text.match(nanobananaRegex);
 
   if (match) {
@@ -107,7 +104,6 @@ export function resolveNanobanana(text: string): string {
       prompt = prompt.substring(0, 800);
     }
 
-    // Use pollinations.ai for real-time AI image generation
     const encodedPrompt = encodeURIComponent(prompt);
     const seed = Math.floor(Math.random() * 1000000);
     return `https://pollinations.ai/p/${encodedPrompt}?width=1200&height=630&nologo=true&seed=${seed}`;
