@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     if (cache.has(styledPrompt)) {
         const { buf, mimeType } = cache.get(styledPrompt)!;
-        return new NextResponse(buf, {
+        return new NextResponse(new Uint8Array(buf), {
             headers: {
                 'Content-Type': mimeType,
                 'Cache-Control': 'public, max-age=604800, immutable',
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
     cache.set(styledPrompt, { buf, mimeType });
 
     // Cache-Control: Vercel CDN이 7일간 캐시 → API 호출 최소화
-    return new NextResponse(buf, {
+    return new NextResponse(new Uint8Array(buf), {
         headers: {
             'Content-Type': mimeType,
             'Cache-Control': 'public, max-age=604800, immutable',
