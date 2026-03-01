@@ -10,11 +10,11 @@ const categories = [
     { name: 'LATEST', korean: '최신글', href: '/category/latest' },
     { name: 'HACKS', korean: '생활팁', href: '/category/hacks' },
     { name: 'TECH', korean: '기술', href: '/category/tech' },
-    { name: 'BEST PICKS', korean: '추천', href: '/category/best-picks' },
     { name: 'ENTERTAINMENT', korean: '엔터테인먼트', href: '/category/entertainment' },
     { name: 'HEALTH', korean: '건강', href: '/category/health' },
     { name: 'REVIEWS', korean: '리뷰', href: '/category/reviews' },
     { name: 'DEALS', korean: '특가', href: '/category/deals' },
+    { name: 'BEST PICKS', korean: '추천', href: '/category/best-picks' },
 ];
 
 export default function Header() {
@@ -195,59 +195,70 @@ export default function Header() {
             </div>
         )}
 
-        {/* Fullscreen Menu Overlay - outside header to avoid backdrop-filter issue */}
+        {/* Slide-in Menu Panel - outside header to avoid backdrop-filter issue */}
         {isMobileMenuOpen && (
-            <div className="fixed inset-0 z-[100] bg-white overflow-y-auto">
-                {/* Close Button */}
-                <div className="flex items-center justify-start p-5">
-                    <button
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="p-1 text-slate-900 hover:text-slate-500 transition-colors"
-                        aria-label="메뉴 닫기"
-                    >
-                        <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                {/* Search */}
-                <div className="px-6 pb-8">
-                    <form onSubmit={handleMobileSearch} className="flex items-center border-b-2 border-slate-300 pb-2">
-                        <input
-                            ref={mobileSearchRef}
-                            type="text"
-                            value={mobileSearchQuery}
-                            onChange={(e) => setMobileSearchQuery(e.target.value)}
-                            placeholder="Search ILSANGGAM"
-                            className="flex-grow bg-transparent border-none text-base font-medium text-slate-900 placeholder:text-slate-400 focus:ring-0 outline-none"
-                        />
-                        <button type="submit" className="text-slate-900 hover:text-slate-500 ml-2">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <>
+                {/* Backdrop */}
+                <div
+                    className="fixed inset-0 z-[90] bg-black/40 transition-opacity"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+                {/* Panel */}
+                <div className="fixed top-0 right-0 bottom-0 z-[100] w-80 max-w-[85vw] bg-white shadow-2xl overflow-y-auto animate-slide-in-right">
+                    {/* Close Button */}
+                    <div className="flex items-center justify-end p-5">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="p-1 text-slate-900 hover:text-slate-500 transition-colors"
+                            aria-label="메뉴 닫기"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
-                    </form>
-                </div>
+                    </div>
 
-                {/* Category List */}
-                <nav className="px-6">
-                    <ul>
-                        {categories.map((cat) => (
-                            <li key={cat.name} className="border-b border-slate-200">
-                                <Link
-                                    href={cat.href}
-                                    className="flex items-center justify-between py-4 hover:text-slate-500 transition-colors group"
-                                >
-                                    <span className="text-[15px] font-black tracking-wider text-slate-900 uppercase group-hover:text-slate-500">
-                                        {cat.name}
-                                    </span>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
-            </div>
+                    {/* Search */}
+                    <div className="px-6 pb-6">
+                        <form onSubmit={handleMobileSearch} className="flex items-center border-b-2 border-slate-300 pb-2">
+                            <input
+                                ref={mobileSearchRef}
+                                type="text"
+                                value={mobileSearchQuery}
+                                onChange={(e) => setMobileSearchQuery(e.target.value)}
+                                placeholder="Search ILSANGGAM"
+                                className="flex-grow bg-transparent border-none text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:ring-0 outline-none"
+                            />
+                            <button type="submit" className="text-slate-900 hover:text-slate-500 ml-2">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Category List */}
+                    <nav className="px-6">
+                        <ul>
+                            {categories.map((cat) => (
+                                <li key={cat.name} className="border-b border-slate-200 last:border-0">
+                                    <Link
+                                        href={cat.href}
+                                        className="flex items-center justify-between py-3.5 hover:text-blue-600 transition-colors group"
+                                    >
+                                        <span className="text-[13px] font-black tracking-wider text-slate-900 uppercase group-hover:text-blue-600">
+                                            {cat.name}
+                                        </span>
+                                        <svg className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+                </div>
+            </>
         )}
 
         <header className="bg-white/95 backdrop-blur-sm px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 sticky top-0 z-50 border-b border-slate-100">
