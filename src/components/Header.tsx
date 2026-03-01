@@ -7,7 +7,7 @@ import { getSupabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
 const categories = [
-    { name: 'LATEST', korean: '최신글', href: '/' },
+    { name: 'LATEST', korean: '최신글', href: '/category/latest' },
     { name: 'HACKS', korean: '생활팁', href: '/category/hacks' },
     { name: 'TECH', korean: '기술', href: '/category/tech' },
     { name: 'BEST PICKS', korean: '추천', href: '/category/best-picks' },
