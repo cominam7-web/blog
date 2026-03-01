@@ -121,7 +121,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                                 img: ({ node, ...props }) => (
                                     <div className="my-12 bg-slate-50 border border-dashed border-slate-200 p-2 overflow-hidden group">
                                         <Image
-                                            src={props.src || ''}
+                                            src={typeof props.src === 'string' ? props.src : ''}
                                             alt={props.alt || 'Nanobanana Content Image'}
                                             width={1200}
                                             height={630}
