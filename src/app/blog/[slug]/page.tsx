@@ -147,7 +147,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                                     if (hasImage) return <div {...props}>{children}</div>;
                                     return <p {...props}>{children}</p>;
                                 },
-                                // 외부 링크: 새 탭으로 열기 + 버튼 스타일
+                                // 외부 링크: 새 탭으로 열기 + 블록 스타일 (항상 새 줄)
                                 a: ({ node, href, children, ...props }) => {
                                     const isExternal = href?.startsWith('http');
                                     return (
@@ -155,6 +155,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                                             href={href}
                                             target={isExternal ? '_blank' : undefined}
                                             rel={isExternal ? 'noopener noreferrer' : undefined}
+                                            className={isExternal ? 'block mt-3' : ''}
                                             style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 600 }}
                                             {...props}
                                         >

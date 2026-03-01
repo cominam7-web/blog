@@ -78,6 +78,9 @@ export function getSortedPostsData() {
   return allPostsData.sort((a, b) => {
     if (a.date < b.date) return 1;
     if (a.date > b.date) return -1;
+    // 같은 날짜: slug 역순 (타임스탬프가 큰 최신 글이 먼저)
+    if (a.slug > b.slug) return -1;
+    if (a.slug < b.slug) return 1;
     return 0;
   });
 }
