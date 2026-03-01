@@ -309,6 +309,11 @@ export default function Header() {
                         {/* Auth Buttons / User Info */}
                         {user ? (
                             <div className="flex items-center gap-2 text-[11px] font-bold">
+                                {user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+                                    <Link href="/admin" className="text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest">
+                                        Admin
+                                    </Link>
+                                )}
                                 <span className="hidden sm:inline text-slate-700">
                                     {getUserDisplayName(user)}
                                 </span>
