@@ -1,4 +1,5 @@
-import { getPostData, getSortedPostsData, resolveNanobanana } from '@/lib/posts';
+import { getPostData, getSortedPostsData } from '@/lib/posts';
+import { resolveNanobanana, NANOBANANA_REGEX } from '@/lib/nanobanana';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
@@ -48,7 +49,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
     };
 
     // Helper to render content with nanobanana tags as images
-    const processedContent = postData.content.replace(/[\[［][\s\S]*?(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]*?)[\]］]/gi, (match) => {
+    const processedContent = postData.content.replace(NANOBANANA_REGEX, (match) => {
         const imageUrl = resolveNanobanana(match);
         return `\n\n![Nanobanana Image](${imageUrl})\n\n`;
     });

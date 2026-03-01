@@ -1,3 +1,5 @@
+export const NANOBANANA_REGEX = /[\[［][\s\S]*?(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]*?)[\]］]/gi;
+
 export function resolveNanobanana(text: any): string {
     if (!text) return '';
 
