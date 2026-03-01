@@ -7,8 +7,9 @@ export const maxDuration = 60;
 const cache = new Map<string, { buf: Buffer; mimeType: string }>();
 
 // 기본 이미지 스타일 (모든 나노바나나 이미지에 자동 적용)
+// no text/letters: AI 이미지 모델의 텍스트 렌더링 오류(오타, 영문 혼용)를 근본적으로 방지
 const STYLE_PREFIX = 'delicate watercolor painting of ';
-const STYLE_SUFFIX = ', soft washes of color, wet-on-wet technique, pastel color palette, paper texture visible, gentle and artistic feel';
+const STYLE_SUFFIX = ', soft washes of color, wet-on-wet technique, pastel color palette, paper texture visible, gentle and artistic feel, no text, no letters, no words, no writing, no labels, no typography, no captions, purely visual illustration without any text or writing';
 
 function buildStyledPrompt(subject: string): string {
     return `${STYLE_PREFIX}${subject}${STYLE_SUFFIX}`;
