@@ -4,9 +4,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import ViewTracker from '@/components/ViewTracker';
 import PostStats from '@/components/PostStats';
 import Comments from '@/components/Comments';
+import ShareButton from '@/components/ShareButton';
 
 export async function generateStaticParams() {
     const posts = getSortedPostsData();
@@ -56,10 +59,13 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
     };
 
     // Helper to render content with nanobanana tags as images
-    const processedContent = postData.content.replace(NANOBANANA_REGEX, (match) => {
-        const imageUrl = resolveNanobanana(match);
-        return `![Nanobanana Image](${imageUrl})`;
-    });
+    // Also convert **bold** to <strong> for Korean text (CommonMark can't handle **bold**한글)
+    const processedContent = postData.content
+        .replace(NANOBANANA_REGEX, (match) => {
+            const imageUrl = resolveNanobanana(match);
+            return `![Nanobanana Image](${imageUrl})`;
+        })
+        .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
 
     return (
         <article className="min-h-screen bg-white">
@@ -73,11 +79,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     <Link href={`/category/${postData.category.toLowerCase().replace(/ /g, '-')}`} className="text-slate-400 hover:text-blue-600 transition-colors">
                         {postData.category}
                     </Link>
-                    <button className="ml-4 p-1 hover:bg-slate-50 rounded-full transition-colors" title="Share this article">
-                        <svg className="w-5 h-5 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                        </svg>
-                    </button>
+                    <ShareButton />
                 </div>
 
                 {/* Main Heading & Excerpt */}
@@ -134,6 +136,8 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
 
                     <div className="prose prose-slate prose-lg lg:prose-xl max-w-none prose-headings:text-slate-950 prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase prose-strong:text-slate-900 prose-a:text-blue-600">
                         <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[rehypeRaw]}
                             components={{
                                 // p 안에 img가 있으면 div로 교체 (하이드레이션 에러 방지)
                                 p: ({ node, children, ...props }) => {

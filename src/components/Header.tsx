@@ -14,9 +14,7 @@ const categories = [
     { name: 'ENTERTAINMENT', korean: '엔터테인먼트', href: '/category/entertainment' },
     { name: 'HEALTH', korean: '건강', href: '/category/health' },
     { name: 'REVIEWS', korean: '리뷰', href: '/category/reviews' },
-    { name: 'HOME & GARDEN', korean: '홈&가든', href: '/category/home-&-garden' },
     { name: 'DEALS', korean: '특가', href: '/category/deals' },
-    { name: 'COMPARISONS', korean: '비교', href: '/category/comparisons' },
 ];
 
 export default function Header() {
@@ -140,6 +138,60 @@ export default function Header() {
     };
 
     return (
+        <>
+        {/* Auth Modal - outside header to avoid backdrop-filter positioning issue */}
+        {showAuthModal && (
+            <div
+                className="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4"
+                onClick={(e) => { if (e.target === e.currentTarget) closeAuthModal(); }}
+            >
+                <div className="bg-white border-2 border-slate-900 p-8 w-full max-w-sm">
+                    <div className="flex items-center justify-between mb-6">
+                        <h4 className="text-xl font-black tracking-tighter text-slate-900 uppercase">
+                            {showAuthModal === 'login' ? 'Log In' : 'Sign Up'}
+                        </h4>
+                        <button onClick={closeAuthModal} className="text-slate-400 hover:text-slate-900 transition-colors">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <form onSubmit={handleAuthSubmit} className="space-y-4">
+                        {showAuthModal === 'signup' && (
+                            <div>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">닉네임 *</label>
+                                <input type="text" value={authDisplayName} onChange={(e) => setAuthDisplayName(e.target.value)} required
+                                    className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="표시될 이름" />
+                            </div>
+                        )}
+                        <div>
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">이메일 *</label>
+                            <input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required
+                                className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="email@example.com" />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">비밀번호 *</label>
+                            <input type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required minLength={6}
+                                className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="최소 6자" />
+                        </div>
+                        {authError && (
+                            <p className="text-red-500 text-sm font-medium bg-red-50 px-3 py-2 border border-red-100">{authError}</p>
+                        )}
+                        <button type="submit" disabled={authLoading}
+                            className="w-full py-3 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest hover:bg-slate-700 transition-colors disabled:opacity-50">
+                            {authLoading ? '처리 중...' : showAuthModal === 'login' ? 'Log In' : 'Sign Up'}
+                        </button>
+                        <button type="button" onClick={() => {
+                            setShowAuthModal(showAuthModal === 'login' ? 'signup' : 'login');
+                            setAuthError('');
+                        }} className="w-full text-center text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors py-1">
+                            {showAuthModal === 'login' ? '계정이 없으신가요? → 회원가입' : '이미 계정이 있으신가요? → 로그인'}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        )}
+
         <header className="bg-white/95 backdrop-blur-sm px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 sticky top-0 z-50 border-b border-slate-100">
             <div className="max-w-7xl mx-auto">
                 {/* Desktop Search Overlay */}
@@ -271,59 +323,6 @@ export default function Header() {
                     </div>
                 )}
 
-                {/* Auth Modal */}
-                {showAuthModal && (
-                    <div
-                        className="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4"
-                        onClick={(e) => { if (e.target === e.currentTarget) closeAuthModal(); }}
-                    >
-                        <div className="bg-white border-2 border-slate-900 p-8 w-full max-w-sm">
-                            <div className="flex items-center justify-between mb-6">
-                                <h4 className="text-xl font-black tracking-tighter text-slate-900 uppercase">
-                                    {showAuthModal === 'login' ? 'Log In' : 'Sign Up'}
-                                </h4>
-                                <button onClick={closeAuthModal} className="text-slate-400 hover:text-slate-900 transition-colors">
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <form onSubmit={handleAuthSubmit} className="space-y-4">
-                                {showAuthModal === 'signup' && (
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">닉네임 *</label>
-                                        <input type="text" value={authDisplayName} onChange={(e) => setAuthDisplayName(e.target.value)} required
-                                            className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="표시될 이름" />
-                                    </div>
-                                )}
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">이메일 *</label>
-                                    <input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required
-                                        className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="email@example.com" />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">비밀번호 *</label>
-                                    <input type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required minLength={6}
-                                        className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="최소 6자" />
-                                </div>
-                                {authError && (
-                                    <p className="text-red-500 text-sm font-medium bg-red-50 px-3 py-2 border border-red-100">{authError}</p>
-                                )}
-                                <button type="submit" disabled={authLoading}
-                                    className="w-full py-3 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest hover:bg-slate-700 transition-colors disabled:opacity-50">
-                                    {authLoading ? '처리 중...' : showAuthModal === 'login' ? 'Log In' : 'Sign Up'}
-                                </button>
-                                <button type="button" onClick={() => {
-                                    setShowAuthModal(showAuthModal === 'login' ? 'signup' : 'login');
-                                    setAuthError('');
-                                }} className="w-full text-center text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors py-1">
-                                    {showAuthModal === 'login' ? '계정이 없으신가요? → 회원가입' : '이미 계정이 있으신가요? → 로그인'}
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                )}
-
                 {/* Top Section */}
                 <div className="flex justify-between items-center pb-4 sm:pb-6">
                     {/* Logo */}
@@ -439,5 +438,6 @@ export default function Header() {
                 </nav>
             </div>
         </header>
+      </>
     );
 }

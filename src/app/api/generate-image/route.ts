@@ -1,18 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 // Vercel Pro: 최대 300초 / Hobby: 10초 (Gemini 생성에 6~12초 필요)
 export const maxDuration = 60;
 
-// L1 인메모리 캐시 (동일 서버리스 인스턴스 내 중복 생성 방지)
-const cache = new Map<string, { buf: Buffer; mimeType: string }>();
+const BUCKET = 'generated-images';
 
 // 기본 이미지 스타일 (모든 나노바나나 이미지에 자동 적용)
-// no text/letters: AI 이미지 모델의 텍스트 렌더링 오류(오타, 영문 혼용)를 근본적으로 방지
 const STYLE_PREFIX = 'delicate watercolor painting of ';
 const STYLE_SUFFIX = ', soft washes of color, wet-on-wet technique, pastel color palette, paper texture visible, gentle and artistic feel, no text, no letters, no words, no writing, no labels, no typography, no captions, purely visual illustration without any text or writing';
 
 function buildStyledPrompt(subject: string): string {
     return `${STYLE_PREFIX}${subject}${STYLE_SUFFIX}`;
+}
+
+function promptToHash(prompt: string): string {
+    return crypto.createHash('sha256').update(prompt).digest('hex').slice(0, 16);
+}
+
+function getSupabaseAdmin() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    return createClient(url, key);
 }
 
 export async function GET(request: NextRequest) {
@@ -22,17 +32,24 @@ export async function GET(request: NextRequest) {
     }
 
     const styledPrompt = buildStyledPrompt(prompt.slice(0, 800));
+    const hash = promptToHash(styledPrompt);
+    const filePath = `${hash}.png`;
 
-    if (cache.has(styledPrompt)) {
-        const { buf, mimeType } = cache.get(styledPrompt)!;
+    // 1. Supabase Storage에서 기존 이미지 확인
+    const sb = getSupabaseAdmin();
+    const { data: existingFile } = await sb.storage.from(BUCKET).download(filePath);
+
+    if (existingFile) {
+        const buf = Buffer.from(await existingFile.arrayBuffer());
         return new NextResponse(new Uint8Array(buf), {
             headers: {
-                'Content-Type': mimeType,
-                'Cache-Control': 'public, max-age=604800, immutable',
+                'Content-Type': 'image/png',
+                'Cache-Control': 'public, max-age=31536000, immutable',
             },
         });
     }
 
+    // 2. 없으면 Gemini로 새 이미지 생성
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
         return NextResponse.json(
@@ -41,7 +58,6 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    // gemini-2.5-flash-image: 이미지 생성 지원 최신 안정 모델
     const model = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
     const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -65,8 +81,6 @@ export async function GET(request: NextRequest) {
     }
 
     const json = await res.json();
-
-    // IMAGE 파트 추출
     const parts: any[] = json.candidates?.[0]?.content?.parts ?? [];
     const imagePart = parts.find((p: any) => p.inlineData?.data);
 
@@ -76,15 +90,22 @@ export async function GET(request: NextRequest) {
     }
 
     const buf = Buffer.from(imagePart.inlineData.data, 'base64');
-    const mimeType = imagePart.inlineData.mimeType || 'image/png';
 
-    cache.set(styledPrompt, { buf, mimeType });
+    // 3. Supabase Storage에 영구 저장
+    const { error: uploadError } = await sb.storage.from(BUCKET).upload(filePath, buf, {
+        contentType: 'image/png',
+        upsert: false,
+    });
 
-    // Cache-Control: Vercel CDN이 7일간 캐시 → API 호출 최소화
+    if (uploadError) {
+        console.warn('Supabase upload warning:', uploadError.message);
+    }
+
+    // Cache-Control: 1년 (Supabase에 저장되었으므로 영구 캐시 가능)
     return new NextResponse(new Uint8Array(buf), {
         headers: {
-            'Content-Type': mimeType,
-            'Cache-Control': 'public, max-age=604800, immutable',
+            'Content-Type': 'image/png',
+            'Cache-Control': 'public, max-age=31536000, immutable',
         },
     });
 }
