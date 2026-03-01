@@ -28,11 +28,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {
         title: post.title,
         description: post.excerpt,
+        keywords: post.tags.length > 0 ? post.tags.join(', ') : undefined,
         openGraph: {
             title: post.title,
             description: post.excerpt,
             type: 'article',
             publishedTime: post.date,
+            tags: post.tags,
         },
     };
 }
@@ -99,6 +101,21 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </span>
                         <PostStats slug={slug} />
                     </div>
+
+                    {/* Tags */}
+                    {postData.tags.length > 0 && (
+                        <div className="flex items-center justify-center gap-2 flex-wrap mt-6">
+                            {postData.tags.map((tag) => (
+                                <Link
+                                    key={tag}
+                                    href={`/search?q=${encodeURIComponent(tag)}`}
+                                    className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                >
+                                    #{tag}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </header>
 
                 {/* Main Content Area */}
@@ -175,8 +192,26 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </ReactMarkdown>
                     </div>
 
+                    {/* Tags Footer */}
+                    {postData.tags.length > 0 && (
+                        <div className="mt-12 pt-8 border-t border-dashed border-slate-200">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Tags</p>
+                            <div className="flex flex-wrap gap-2">
+                                {postData.tags.map((tag) => (
+                                    <Link
+                                        key={tag}
+                                        href={`/search?q=${encodeURIComponent(tag)}`}
+                                        className="px-3 py-1.5 border border-slate-200 text-slate-500 text-xs font-bold rounded-full hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                    >
+                                        #{tag}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Related/Footer Info */}
-                    <div className="mt-16 pt-8 border-t-2 border-slate-900">
+                    <div className="mt-8 pt-8 border-t-2 border-slate-900">
                         <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
                             <span>End of Article</span>
                             <Link href="/" className="text-blue-600 hover:underline">Back to Home</Link>

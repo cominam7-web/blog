@@ -19,6 +19,7 @@ export interface PostData {
   date: string;
   excerpt: string;
   category: string;
+  tags: string[];
   image?: string;
   content: string;
 }
@@ -68,6 +69,7 @@ export function getSortedPostsData() {
         date: formatDate(matterResult.data.date),
         excerpt: matterResult.data.excerpt || '',
         category: matterResult.data.category || 'Hacks',
+        tags: Array.isArray(matterResult.data.tags) ? matterResult.data.tags : [],
         image: matterResult.data.image || '',
         content: matterResult.content,
       };
@@ -97,6 +99,7 @@ export function getPostData(slug: string): PostData | null {
     date: formatDate(matterResult.data.date),
     excerpt: matterResult.data.excerpt || '',
     category: matterResult.data.category || 'Hacks',
+    tags: Array.isArray(matterResult.data.tags) ? matterResult.data.tags : [],
     image: matterResult.data.image || '',
     content: matterResult.content,
   };

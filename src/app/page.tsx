@@ -185,6 +185,15 @@ export default async function Home() {
                   <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">
                     {post.excerpt}
                   </p>
+                  {post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {post.tags.slice(0, 3).map((tag) => (
+                        <span key={tag} className="px-2 py-0.5 bg-slate-50 text-slate-400 text-[10px] font-bold rounded-full">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="mt-6 flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span>{post.date}</span>
