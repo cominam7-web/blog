@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Vercel Pro: 최대 300초 / Hobby: 10초 (Gemini 생성에 6~12초 필요)
+export const maxDuration = 60;
+
 // L1 인메모리 캐시 (동일 서버리스 인스턴스 내 중복 생성 방지)
 const cache = new Map<string, { buf: Buffer; mimeType: string }>();
 
