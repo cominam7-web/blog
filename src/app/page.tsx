@@ -35,7 +35,12 @@ async function getMostViewedSlug(): Promise<string | null> {
 }
 
 
-export default async function Home() {
+const POSTS_PER_PAGE = 6;
+
+export default async function Home({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const { page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || '1', 10) || 1);
+
   // MD 파일에서 전체 포스트 로드 (날짜 내림차순)
   const allPostsData = getSortedPostsData().map(post => ({
     ...post,
@@ -50,6 +55,9 @@ export default async function Home() {
 
   // Latest Stories: 날짜 내림차순 (가장 최근 글이 맨 왼쪽), featured 제외
   const remainingPosts = allPostsData.filter(p => p.slug !== featuredPost?.slug);
+  const totalPages = Math.max(1, Math.ceil(remainingPosts.length / POSTS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedPosts = remainingPosts.slice((safePage - 1) * POSTS_PER_PAGE, safePage * POSTS_PER_PAGE);
 
   return (
     <main className="min-h-screen bg-white">
@@ -117,7 +125,7 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
-            {remainingPosts.map((post) => (
+            {paginatedPosts.map((post) => (
               <article key={post.slug} className="group border-b border-dashed border-slate-200 pb-12 last:border-0 h-full flex flex-col">
                 <Link href={`/blog/${post.slug}`} className="relative mb-6 block overflow-hidden aspect-video bg-slate-50 rounded-sm">
                   {post.image ? (
@@ -164,6 +172,43 @@ export default async function Home() {
               </article>
             ))}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <nav className="flex items-center justify-center gap-2 mt-16 pt-8 border-t border-dashed border-slate-200">
+              {safePage > 1 && (
+                <Link
+                  href={safePage === 2 ? '/' : `/?page=${safePage - 1}`}
+                  className="px-4 py-2 text-sm font-bold text-slate-600 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors"
+                >
+                  ← Prev
+                </Link>
+              )}
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <Link
+                  key={p}
+                  href={p === 1 ? '/' : `/?page=${p}`}
+                  className={`w-10 h-10 flex items-center justify-center text-sm font-bold transition-colors ${
+                    p === safePage
+                      ? 'bg-slate-900 text-white'
+                      : 'text-slate-500 border border-slate-300 hover:bg-slate-100'
+                  }`}
+                >
+                  {p}
+                </Link>
+              ))}
+
+              {safePage < totalPages && (
+                <Link
+                  href={`/?page=${safePage + 1}`}
+                  className="px-4 py-2 text-sm font-bold text-slate-600 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors"
+                >
+                  Next →
+                </Link>
+              )}
+            </nav>
+          )}
         </section>
       </div>
     </main>
