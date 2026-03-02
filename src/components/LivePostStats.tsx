@@ -5,11 +5,9 @@ import { getSupabase } from '@/lib/supabase';
 
 type Stats = Record<string, { views: number; comments: number }>;
 
-// 모듈 레벨 캐시: 같은 페이지의 모든 인스턴스가 1번만 fetch
+// ── 통계 캐시 ──
 let statsCache: Stats | null = null;
 let fetchPromise: Promise<Stats> | null = null;
-let isAdminCache: boolean | null = null;
-let adminCheckPromise: Promise<boolean> | null = null;
 
 function getAllStats(): Promise<Stats> {
     if (statsCache) return Promise.resolve(statsCache);
@@ -30,22 +28,44 @@ function getAllStats(): Promise<Stats> {
     return fetchPromise;
 }
 
-function checkIsAdmin(): Promise<boolean> {
-    if (isAdminCache !== null) return Promise.resolve(isAdminCache);
-    if (adminCheckPromise) return adminCheckPromise;
+// ── 어드민 감지 (onAuthStateChange 기반) ──
+let adminResolved = false;
+let adminValue = false;
+const adminListeners = new Set<(v: boolean) => void>();
+let adminInitialized = false;
 
-    adminCheckPromise = getSupabase().auth.getUser()
-        .then(({ data }) => {
-            const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-            isAdminCache = !!(data.user && adminEmail && data.user.email === adminEmail);
-            return isAdminCache;
-        })
-        .catch(() => {
-            isAdminCache = false;
-            return false;
-        });
+function initAdminListener() {
+    if (adminInitialized) return;
+    adminInitialized = true;
 
-    return adminCheckPromise;
+    const supabase = getSupabase();
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
+    const update = (email: string | undefined) => {
+        const val = !!(email && adminEmail && email === adminEmail);
+        adminValue = val;
+        adminResolved = true;
+        adminListeners.forEach(cb => cb(val));
+    };
+
+    // 초기 체크
+    supabase.auth.getUser().then(({ data }) => {
+        update(data.user?.email);
+    });
+
+    // 로그인/로그아웃 감지
+    supabase.auth.onAuthStateChange((_event, session) => {
+        update(session?.user?.email);
+    });
+}
+
+function onAdminChange(callback: (isAdmin: boolean) => void): () => void {
+    initAdminListener();
+    adminListeners.add(callback);
+    if (adminResolved) {
+        callback(adminValue);
+    }
+    return () => { adminListeners.delete(callback); };
 }
 
 export default function LivePostStats({ slug, variant = 'compact' }: { slug: string; variant?: 'compact' | 'featured' }) {
@@ -61,7 +81,8 @@ export default function LivePostStats({ slug, variant = 'compact' }: { slug: str
                 setComments(s.comments);
             }
         });
-        checkIsAdmin().then(setIsAdmin);
+        const unsub = onAdminChange(setIsAdmin);
+        return unsub;
     }, [slug]);
 
     if (variant === 'featured') {

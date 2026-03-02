@@ -28,11 +28,21 @@ export default function PostStats({ slug }: { slug: string }) {
                 setCommentCount(count ?? 0);
             });
 
-        // Admin 체크
+        // Admin 체크: onAuthStateChange로 세션 복원 후에도 감지
         const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+        const checkAdmin = (email: string | undefined) => {
+            setIsAdmin(!!(email && adminEmail && email === adminEmail));
+        };
+
         supabase.auth.getUser().then(({ data }) => {
-            setIsAdmin(!!(data.user && adminEmail && data.user.email === adminEmail));
+            checkAdmin(data.user?.email);
         });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            checkAdmin(session?.user?.email);
+        });
+
+        return () => subscription.unsubscribe();
     }, [slug]);
 
     return (
