@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getSortedPostsData, resolveNanobanana } from '@/lib/posts';
 import { createClient } from '@supabase/supabase-js';
+import LivePostStats from '@/components/LivePostStats';
 
 // ISR: 1시간마다 재생성 → 조회수 변동 반영
 export const revalidate = 3600;
@@ -33,37 +34,6 @@ async function getMostViewedSlug(): Promise<string | null> {
   }
 }
 
-// 모든 포스트의 조회수 + 댓글 수 가져오기
-async function getAllPostStats(): Promise<Record<string, { views: number; comments: number }>> {
-  try {
-    const supabase = getServerSupabase();
-    if (!supabase) return {};
-
-    const [viewsResult, commentsResult] = await Promise.all([
-      supabase.from('posts').select('slug, views'),
-      supabase.from('comments').select('slug'),
-    ]);
-
-    const stats: Record<string, { views: number; comments: number }> = {};
-
-    if (viewsResult.data) {
-      for (const row of viewsResult.data) {
-        stats[row.slug] = { views: row.views ?? 0, comments: 0 };
-      }
-    }
-
-    if (commentsResult.data) {
-      for (const row of commentsResult.data) {
-        if (!stats[row.slug]) stats[row.slug] = { views: 0, comments: 0 };
-        stats[row.slug].comments++;
-      }
-    }
-
-    return stats;
-  } catch {
-    return {};
-  }
-}
 
 export default async function Home() {
   // MD 파일에서 전체 포스트 로드 (날짜 내림차순)
@@ -73,10 +43,7 @@ export default async function Home() {
   }));
 
   // Featured: 조회수 1위 글 (없으면 최신 글로 fallback)
-  const [mostViewedSlug, postStats] = await Promise.all([
-    getMostViewedSlug(),
-    getAllPostStats(),
-  ]);
+  const mostViewedSlug = await getMostViewedSlug();
   const featuredPost =
     (mostViewedSlug ? allPostsData.find(p => p.slug === mostViewedSlug) : null)
     ?? allPostsData[0];
@@ -119,13 +86,7 @@ export default async function Home() {
               <span>|</span>
               <span>{featuredPost.date}</span>
               <span>|</span>
-              <span className="flex items-center gap-1">
-                👁 {(postStats[featuredPost.slug]?.views ?? 0).toLocaleString()} Views
-              </span>
-              <span>|</span>
-              <span className="flex items-center gap-1 hover:text-blue-600 cursor-pointer transition-colors">
-                💬 {postStats[featuredPost.slug]?.comments ?? 0} Comments
-              </span>
+              <LivePostStats slug={featuredPost.slug} variant="featured" />
             </div>
 
             <Link href={`/blog/${featuredPost.slug}`} className="block group relative overflow-hidden rounded-sm bg-slate-100 aspect-[21/9] border border-slate-100 mb-10">
@@ -198,9 +159,7 @@ export default async function Home() {
                 <div className="mt-6 flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                   <span>{post.date}</span>
                   <span>•</span>
-                  <span>👁 {(postStats[post.slug]?.views ?? 0).toLocaleString()}</span>
-                  <span>•</span>
-                  <span>💬 {postStats[post.slug]?.comments ?? 0}</span>
+                  <LivePostStats slug={post.slug} />
                 </div>
               </article>
             ))}

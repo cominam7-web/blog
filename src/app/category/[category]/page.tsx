@@ -1,42 +1,7 @@
 import { getSortedPostsData, resolveNanobanana } from '@/lib/posts';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@supabase/supabase-js';
-
-export const revalidate = 3600;
-
-function getServerSupabase() {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-    if (!url || !key || !url.startsWith('http')) return null;
-    return createClient(url, key);
-}
-
-async function getAllPostStats(): Promise<Record<string, { views: number; comments: number }>> {
-    try {
-        const supabase = getServerSupabase();
-        if (!supabase) return {};
-        const [viewsResult, commentsResult] = await Promise.all([
-            supabase.from('posts').select('slug, views'),
-            supabase.from('comments').select('slug'),
-        ]);
-        const stats: Record<string, { views: number; comments: number }> = {};
-        if (viewsResult.data) {
-            for (const row of viewsResult.data) {
-                stats[row.slug] = { views: row.views ?? 0, comments: 0 };
-            }
-        }
-        if (commentsResult.data) {
-            for (const row of commentsResult.data) {
-                if (!stats[row.slug]) stats[row.slug] = { views: 0, comments: 0 };
-                stats[row.slug].comments++;
-            }
-        }
-        return stats;
-    } catch {
-        return {};
-    }
-}
+import LivePostStats from '@/components/LivePostStats';
 
 export async function generateStaticParams() {
     const categories = [
@@ -66,7 +31,6 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
     }));
 
     const categoryTitle = category.toUpperCase().replace(/-/g, ' ');
-    const postStats = await getAllPostStats();
 
     return (
         <main className="min-h-screen bg-white">
@@ -117,9 +81,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                                 <div className="mt-6 flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                     <span>{post.date}</span>
                                     <span>•</span>
-                                    <span>👁 {(postStats[post.slug]?.views ?? 0).toLocaleString()}</span>
-                                    <span>•</span>
-                                    <span>💬 {postStats[post.slug]?.comments ?? 0}</span>
+                                    <LivePostStats slug={post.slug} />
                                 </div>
                             </article>
                         ))}
