@@ -207,7 +207,7 @@ export default function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
                 {/* Panel */}
-                <div className="fixed top-0 right-0 bottom-0 z-[100] w-80 max-w-[85vw] bg-white shadow-2xl overflow-y-auto animate-slide-in-right">
+                <div className="fixed top-0 right-0 bottom-0 z-[100] w-80 max-w-[85vw] bg-white shadow-2xl overflow-y-auto animate-slide-in-right flex flex-col">
                     {/* Close Button */}
                     <div className="flex items-center justify-end p-5">
                         <button
@@ -242,16 +242,21 @@ export default function Header() {
 
                     {/* Category List */}
                     <nav className="px-6">
-                        <ul>
+                        <ul className="border-t border-dashed border-slate-300">
                             {categories.map((cat) => (
-                                <li key={cat.name} className="border-b border-slate-200 last:border-0">
+                                <li key={cat.name} className="border-b border-dashed border-slate-300">
                                     <Link
                                         href={cat.href}
-                                        className="flex items-center justify-between py-3.5 hover:text-blue-600 transition-colors group"
+                                        className="flex items-center justify-between py-4 hover:text-blue-600 transition-colors group"
                                     >
-                                        <span className="text-[13px] font-black tracking-wider text-slate-900 uppercase group-hover:text-blue-600">
-                                            {cat.name}
-                                        </span>
+                                        <div className="flex flex-col">
+                                            <span className="text-[13px] font-black tracking-widest text-slate-900 uppercase group-hover:text-blue-600">
+                                                {cat.name}
+                                            </span>
+                                            <span className="text-[10px] font-medium text-slate-400 mt-0.5">
+                                                {cat.korean}
+                                            </span>
+                                        </div>
                                         <svg className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                                         </svg>
@@ -260,6 +265,26 @@ export default function Header() {
                             ))}
                         </ul>
                     </nav>
+
+                    {/* Footer Links */}
+                    <div className="mt-auto px-6 py-6 border-t border-slate-200">
+                        <div className="flex items-center justify-center gap-6">
+                            {[
+                                { href: '/', label: 'Home' },
+                                { href: '/about', label: 'About' },
+                                { href: '/contact', label: 'Contact' },
+                                { href: '/privacy', label: 'Privacy' },
+                            ].map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className="text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-wider"
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </>
         )}
