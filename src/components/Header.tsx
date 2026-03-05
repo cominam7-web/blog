@@ -391,23 +391,27 @@ export default function Header() {
                 </div>
 
                 {/* Sub-Navigation */}
-                <nav className="border-t border-b border-dashed border-slate-300 py-1 mb-2 overflow-x-auto no-scrollbar">
-                    <ul className="flex items-center justify-center min-w-max">
-                        {categories.map((cat) => (
-                            <li key={cat.name}>
-                                <Link
-                                    href={cat.href}
-                                    className="text-[13px] sm:text-[15px] font-black tracking-widest text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors cursor-pointer flex flex-col items-center text-center px-4 sm:px-6 py-3 leading-tight whitespace-nowrap"
-                                >
-                                    <span>{cat.name}</span>
-                                    <span className="text-[10px] sm:text-[12px] font-medium text-slate-400 mt-0.5">
-                                        {cat.korean}
-                                    </span>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
+                <div className="relative border-t border-b border-dashed border-slate-300 mb-2">
+                    <nav className="py-1 overflow-x-auto no-scrollbar">
+                        <ul className="flex items-center justify-center min-w-max">
+                            {categories.map((cat) => (
+                                <li key={cat.name}>
+                                    <Link
+                                        href={cat.href}
+                                        className="text-[13px] sm:text-[15px] font-black tracking-widest text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors cursor-pointer flex flex-col items-center text-center px-4 sm:px-6 py-3 leading-tight whitespace-nowrap"
+                                    >
+                                        <span>{cat.name}</span>
+                                        <span className="text-[10px] sm:text-[12px] font-medium text-slate-400 mt-0.5">
+                                            {cat.korean}
+                                        </span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+                    {/* Scroll hint gradient - mobile only */}
+                    <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none sm:hidden" />
+                </div>
             </div>
         </header>
       </>
