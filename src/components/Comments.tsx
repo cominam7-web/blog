@@ -164,10 +164,12 @@ export default function Comments({ slug }: { slug: string }) {
                     </span>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-green-600">
-                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        {views.toLocaleString()} Views
-                    </div>
+                    {user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-green-600">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            {views.toLocaleString()} Views
+                        </div>
+                    )}
                     {user && (
                         <button
                             onClick={handleLogout}
