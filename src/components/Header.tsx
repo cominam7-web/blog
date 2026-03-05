@@ -409,7 +409,8 @@ export default function Header() {
                             ))}
                         </ul>
                     </nav>
-                    {/* Scroll hint gradient - mobile only */}
+                    {/* Scroll hint gradients - mobile only */}
+                    <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent pointer-events-none sm:hidden" />
                     <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none sm:hidden" />
                 </div>
             </div>
