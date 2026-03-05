@@ -140,6 +140,9 @@ export default function Header() {
         }
     };
 
+    // admin 페이지에서는 header 숨김
+    if (pathname.startsWith('/admin')) return null;
+
     return (
         <>
         {/* Auth Modal - outside header to avoid backdrop-filter positioning issue */}
