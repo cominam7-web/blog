@@ -79,66 +79,104 @@ export default function AdminPostsPage() {
             ) : filtered.length === 0 ? (
                 <div className="text-slate-400 py-12 text-center">No posts found</div>
             ) : (
-                <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-slate-200 bg-slate-50">
-                                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Title</th>
-                                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3 hidden sm:table-cell">Status</th>
-                                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3 hidden md:table-cell">Views</th>
-                                <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3 hidden md:table-cell">Date</th>
-                                <th className="text-right text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.map((post) => (
-                                <tr key={post.slug} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                                    <td className="px-4 py-3">
-                                        <Link href={`/admin/posts/${post.slug}/edit`} className="text-sm font-medium text-slate-800 hover:text-blue-600 line-clamp-1">
-                                            {post.title}
-                                        </Link>
-                                        <p className="text-[11px] text-slate-400 mt-0.5">{post.slug}</p>
-                                    </td>
-                                    <td className="px-4 py-3 hidden sm:table-cell">
-                                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                            {post.status || 'published'}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-sm text-slate-500 hidden md:table-cell">
-                                        {(post.views || 0).toLocaleString()}
-                                    </td>
-                                    <td className="px-4 py-3 text-xs text-slate-400 hidden md:table-cell">
-                                        {new Date(post.created_at).toLocaleDateString('ko-KR')}
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Link
-                                                href={`/blog/${post.slug}`}
-                                                target="_blank"
-                                                className="text-[11px] font-bold text-slate-400 hover:text-blue-600 transition-colors"
-                                            >
-                                                View
-                                            </Link>
-                                            <Link
-                                                href={`/admin/posts/${post.slug}/edit`}
-                                                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
-                                            >
-                                                Edit
-                                            </Link>
-                                            <button
-                                                onClick={() => handleDelete(post.slug, post.title)}
-                                                disabled={deleting === post.slug}
-                                                className="text-[11px] font-bold text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
-                                            >
-                                                {deleting === post.slug ? '...' : 'Delete'}
-                                            </button>
-                                        </div>
-                                    </td>
+                <>
+                    {/* Mobile: Card Layout */}
+                    <div className="space-y-3 md:hidden">
+                        {filtered.map((post) => (
+                            <div key={post.slug} className="bg-white rounded-xl border border-slate-200 p-4">
+                                <div className="flex items-start justify-between gap-3 mb-2">
+                                    <Link href={`/admin/posts/${post.slug}/edit`} className="text-sm font-bold text-slate-800 hover:text-blue-600 line-clamp-2 flex-1">
+                                        {post.title}
+                                    </Link>
+                                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded flex-shrink-0 ${post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                        {post.status || 'published'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-3 text-[11px] text-slate-400 mb-3">
+                                    <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
+                                    <span>{(post.views || 0).toLocaleString()} views</span>
+                                </div>
+                                <div className="flex items-center gap-3 pt-2 border-t border-slate-100">
+                                    <Link href={`/blog/${post.slug}`} target="_blank" className="text-xs font-bold text-slate-400 hover:text-blue-600 transition-colors">
+                                        View
+                                    </Link>
+                                    <Link href={`/admin/posts/${post.slug}/edit`} className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                                        Edit
+                                    </Link>
+                                    <button
+                                        onClick={() => handleDelete(post.slug, post.title)}
+                                        disabled={deleting === post.slug}
+                                        className="text-xs font-bold text-red-500 hover:text-red-700 transition-colors disabled:opacity-50 ml-auto"
+                                    >
+                                        {deleting === post.slug ? '...' : 'Delete'}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop: Table Layout */}
+                    <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto hidden md:block">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-slate-200 bg-slate-50">
+                                    <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Title</th>
+                                    <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Status</th>
+                                    <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Views</th>
+                                    <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Date</th>
+                                    <th className="text-right text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {filtered.map((post) => (
+                                    <tr key={post.slug} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
+                                        <td className="px-4 py-3">
+                                            <Link href={`/admin/posts/${post.slug}/edit`} className="text-sm font-medium text-slate-800 hover:text-blue-600 line-clamp-1">
+                                                {post.title}
+                                            </Link>
+                                            <p className="text-[11px] text-slate-400 mt-0.5">{post.slug}</p>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                                {post.status || 'published'}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-slate-500">
+                                            {(post.views || 0).toLocaleString()}
+                                        </td>
+                                        <td className="px-4 py-3 text-xs text-slate-400">
+                                            {new Date(post.created_at).toLocaleDateString('ko-KR')}
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Link
+                                                    href={`/blog/${post.slug}`}
+                                                    target="_blank"
+                                                    className="text-[11px] font-bold text-slate-400 hover:text-blue-600 transition-colors"
+                                                >
+                                                    View
+                                                </Link>
+                                                <Link
+                                                    href={`/admin/posts/${post.slug}/edit`}
+                                                    className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                                                >
+                                                    Edit
+                                                </Link>
+                                                <button
+                                                    onClick={() => handleDelete(post.slug, post.title)}
+                                                    disabled={deleting === post.slug}
+                                                    className="text-[11px] font-bold text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
+                                                >
+                                                    {deleting === post.slug ? '...' : 'Delete'}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
             )}
         </div>
     );
