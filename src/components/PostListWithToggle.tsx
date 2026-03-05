@@ -185,9 +185,9 @@ export default function PostListWithToggle({
                 <>
                     {/* Grid View */}
                     {viewMode === 'grid' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 md:gap-x-12 gap-y-10 md:gap-y-16">
                             {paginatedPosts.map((post) => (
-                                <article key={post.slug} className="group border-b border-dashed border-slate-200 pb-12 last:border-0 h-full flex flex-col">
+                                <article key={post.slug} className="group border-b border-dashed border-slate-200 pb-8 md:pb-12 last:border-0 h-full flex flex-col">
                                     <Link href={`/blog/${post.slug}`} className="relative mb-6 block overflow-hidden aspect-video bg-slate-50 rounded-sm">
                                         {post.image ? (
                                             <Image

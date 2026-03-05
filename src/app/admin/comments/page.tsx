@@ -44,7 +44,7 @@ export default function AdminCommentsPage() {
     };
 
     return (
-        <div className="p-8 max-w-6xl">
+        <div className="p-4 md:p-8 max-w-6xl">
             <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-8">Comments</h1>
 
             {loading ? (
@@ -52,7 +52,7 @@ export default function AdminCommentsPage() {
             ) : comments.length === 0 ? (
                 <div className="text-slate-400 py-12 text-center">No comments yet</div>
             ) : (
-                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-slate-200 bg-slate-50">

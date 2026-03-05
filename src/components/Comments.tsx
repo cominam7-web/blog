@@ -154,16 +154,16 @@ export default function Comments({ slug }: { slug: string }) {
     return (
         <section id="comments" className="mt-20">
             {/* Header */}
-            <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2 mb-8">
-                <div className="flex items-baseline gap-4">
-                    <h3 className="text-2xl font-black tracking-tighter text-slate-900 uppercase">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b-2 border-slate-900 pb-2 mb-8 gap-2">
+                <div className="flex items-baseline gap-2 sm:gap-4">
+                    <h3 className="text-xl sm:text-2xl font-black tracking-tighter text-slate-900 uppercase">
                         Conversation
                     </h3>
                     <span className="text-slate-400 text-[11px] font-bold uppercase tracking-widest pl-2 border-l border-slate-200">
                         {commentCount} Comments
                     </span>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-4">
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-green-600">
                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                         {views.toLocaleString()} Views

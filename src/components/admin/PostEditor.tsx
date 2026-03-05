@@ -148,7 +148,7 @@ export default function PostEditor({ mode, initialData }: PostEditorProps) {
             )}
 
             {/* Metadata Fields */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+            <div className="bg-white rounded-xl border border-slate-200 p-4 md:p-6 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                         <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Title</label>
@@ -221,7 +221,7 @@ export default function PostEditor({ mode, initialData }: PostEditorProps) {
                             Preview
                         </button>
                     </div>
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 items-center flex-wrap">
                         <button
                             onClick={insertNanobanana}
                             className="text-[11px] font-bold text-purple-600 hover:text-purple-800 transition-colors px-2 py-1"
@@ -249,7 +249,7 @@ export default function PostEditor({ mode, initialData }: PostEditorProps) {
                 </div>
 
                 {showPreview ? (
-                    <div className="p-6 min-h-[500px] prose max-w-none">
+                    <div className="p-4 md:p-6 min-h-[300px] md:min-h-[500px] prose max-w-none">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                             {content}
                         </ReactMarkdown>
@@ -260,7 +260,7 @@ export default function PostEditor({ mode, initialData }: PostEditorProps) {
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="Write your post in Markdown..."
-                        className="w-full min-h-[500px] p-6 text-sm font-mono text-slate-800 resize-y focus:outline-none border-none"
+                        className="w-full min-h-[300px] md:min-h-[500px] p-4 md:p-6 text-sm font-mono text-slate-800 resize-y focus:outline-none border-none"
                         spellCheck={false}
                     />
                 )}

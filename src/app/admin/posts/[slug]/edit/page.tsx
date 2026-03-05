@@ -28,7 +28,7 @@ export default function EditPostPage() {
 
     if (loading) {
         return (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <p className="text-slate-400 text-sm">Loading post from GitHub...</p>
             </div>
         );
@@ -36,14 +36,14 @@ export default function EditPostPage() {
 
     if (error || !initialData) {
         return (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <p className="text-red-500 text-sm">{error || 'Post not found'}</p>
             </div>
         );
     }
 
     return (
-        <div className="p-8">
+        <div className="p-4 md:p-8">
             <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Edit Post</h1>
             <p className="text-xs text-slate-400 mb-8 font-mono">{slug}</p>
             <PostEditor mode="edit" initialData={initialData} />

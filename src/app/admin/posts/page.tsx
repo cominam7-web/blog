@@ -52,7 +52,7 @@ export default function AdminPostsPage() {
     );
 
     return (
-        <div className="p-8 max-w-6xl">
+        <div className="p-4 md:p-8 max-w-6xl">
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">Posts</h1>
                 <Link
@@ -79,7 +79,7 @@ export default function AdminPostsPage() {
             ) : filtered.length === 0 ? (
                 <div className="text-slate-400 py-12 text-center">No posts found</div>
             ) : (
-                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
                     <table className="w-full">
                         <thead>
                             <tr className="border-b border-slate-200 bg-slate-50">

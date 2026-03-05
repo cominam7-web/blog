@@ -27,7 +27,7 @@ export default function AdminDashboard() {
 
     if (loading) {
         return (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-8">Dashboard</h1>
                 <div className="text-slate-400">Loading...</div>
             </div>
@@ -36,7 +36,7 @@ export default function AdminDashboard() {
 
     if (!stats) {
         return (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-8">Dashboard</h1>
                 <div className="text-red-500">Failed to load stats</div>
             </div>
@@ -44,7 +44,7 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="p-8 max-w-6xl">
+        <div className="p-4 md:p-8 max-w-6xl">
             <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-8">Dashboard</h1>
 
             {/* Stats Cards */}

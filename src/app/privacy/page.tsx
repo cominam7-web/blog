@@ -12,7 +12,7 @@ export default function Privacy() {
                 </div>
 
                 <header className="mb-12 pb-8 border-b border-dashed border-slate-300">
-                    <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter uppercase leading-tight">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tighter uppercase leading-tight">
                         Privacy Policy
                     </h1>
                 </header>

@@ -79,7 +79,7 @@ export default function InquiriesPage() {
 
     if (loading) {
         return (
-            <div className="p-8">
+            <div className="p-4 md:p-8">
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-8">Inquiries</h1>
                 <div className="text-slate-400">Loading...</div>
             </div>
@@ -87,7 +87,7 @@ export default function InquiriesPage() {
     }
 
     return (
-        <div className="p-8 max-w-6xl">
+        <div className="p-4 md:p-8 max-w-6xl">
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                     <h1 className="text-2xl font-black text-slate-900 tracking-tight">Inquiries</h1>
@@ -100,7 +100,7 @@ export default function InquiriesPage() {
                 <span className="text-slate-400 text-sm">{inquiries.length}개의 문의</span>
             </div>
 
-            <div className="flex gap-6">
+            <div className="flex flex-col md:flex-row gap-6">
                 {/* Inquiry List */}
                 <div className="flex-1 space-y-2">
                     {inquiries.length === 0 ? (
@@ -151,7 +151,7 @@ export default function InquiriesPage() {
 
                 {/* Detail Panel */}
                 {selectedInquiry && (
-                    <div className="w-96 bg-white border border-slate-200 rounded-lg p-6 sticky top-8 self-start">
+                    <div className="w-full md:w-96 bg-white border border-slate-200 rounded-lg p-4 md:p-6 md:sticky md:top-8 md:self-start">
                         <div className="flex items-center justify-between mb-4">
                             {statusBadge(selectedInquiry.status)}
                             <button
