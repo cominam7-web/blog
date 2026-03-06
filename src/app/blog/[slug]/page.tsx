@@ -82,6 +82,11 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
         })
         .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
 
+    // ShareButton에 전달할 OG 이미지 URL (전체 URL로 변환)
+    const ogImage = postData.image
+        ? (postData.image.startsWith('http') ? postData.image : `${siteUrl}${postData.image}`)
+        : undefined;
+
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'Article',
@@ -123,7 +128,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     <Link href={`/category/${postData.category.toLowerCase().replace(/ /g, '-')}`} className="text-slate-400 hover:text-blue-600 transition-colors">
                         {postData.category}
                     </Link>
-                    <ShareButton />
+                    <ShareButton title={postData.title} description={postData.excerpt} imageUrl={ogImage} />
                 </div>
 
                 {/* Main Heading & Excerpt */}
@@ -264,7 +269,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         <div className="flex justify-between items-center">
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">End of Article</span>
                             <div className="flex items-center gap-4">
-                                <ShareButton />
+                                <ShareButton title={postData.title} description={postData.excerpt} imageUrl={ogImage} />
                                 <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Back to Home</Link>
                             </div>
                         </div>
