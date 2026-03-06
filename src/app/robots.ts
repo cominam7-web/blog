@@ -1,14 +1,16 @@
 import { MetadataRoute } from 'next'
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blog.example.com'
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr'
 
 export default function robots(): MetadataRoute.Robots {
     return {
-        rules: {
-            userAgent: '*',
-            allow: '/',
-            disallow: '/private/',
-        },
+        rules: [
+            {
+                userAgent: '*',
+                allow: '/',
+                disallow: ['/admin/', '/api/admin/'],
+            },
+        ],
         sitemap: `${baseUrl}/sitemap.xml`,
     }
 }

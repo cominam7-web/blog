@@ -11,6 +11,8 @@ import PostStats from '@/components/PostStats';
 import Comments from '@/components/Comments';
 import ShareButton from '@/components/ShareButton';
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
+
 export async function generateStaticParams() {
     const posts = getSortedPostsData();
     return posts.map((post) => ({
@@ -28,16 +30,29 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         };
     }
 
+    const ogImage = post.image ? resolveNanobanana(post.image) : undefined;
+
     return {
         title: post.title,
         description: post.excerpt,
         keywords: post.tags.length > 0 ? post.tags.join(', ') : undefined,
+        alternates: {
+            canonical: `/blog/${slug}`,
+        },
         openGraph: {
             title: post.title,
             description: post.excerpt,
             type: 'article',
             publishedTime: post.date,
             tags: post.tags,
+            url: `${siteUrl}/blog/${slug}`,
+            ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630, alt: post.title }] }),
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: post.title,
+            description: post.excerpt,
+            ...(ogImage && { images: [ogImage] }),
         },
     };
 }
@@ -67,8 +82,37 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
         })
         .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: postData.title,
+        description: postData.excerpt,
+        datePublished: postData.date,
+        dateModified: postData.date,
+        author: {
+            '@type': 'Person',
+            name: 'Ilsanggam Life Studio',
+            url: siteUrl,
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: 'Ilsanggam Life Studio',
+            url: siteUrl,
+        },
+        mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `${siteUrl}/blog/${slug}`,
+        },
+        ...(postData.image && { image: postData.image }),
+        keywords: postData.tags.join(', '),
+    };
+
     return (
         <article className="min-h-screen bg-white">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             {/* 조회수 자동 기록 (클라이언트, 세션당 1회) */}
             <ViewTracker slug={slug} />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
