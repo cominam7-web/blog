@@ -87,8 +87,12 @@ export default function ShareButton({ title, description, imageUrl }: ShareButto
         const url = getShareUrl();
         const shareTitle = getShareTitle();
 
-        // 모바일: Web Share API 사용 (시스템 공유 시트 → 인스타 DM/스토리 선택 가능)
-        if (typeof navigator !== 'undefined' && navigator.share) {
+        // 모바일 감지 (터치 디바이스)
+        const isMobile = typeof navigator !== 'undefined' &&
+            /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        if (isMobile && typeof navigator !== 'undefined' && navigator.share) {
+            // 모바일: Web Share API → 시스템 공유 시트 (인스타 DM/스토리 선택 가능)
             try {
                 await navigator.share({
                     title: shareTitle,
@@ -97,11 +101,11 @@ export default function ShareButton({ title, description, imageUrl }: ShareButto
                 });
                 return;
             } catch {
-                // 사용자가 공유 취소하거나 에러 시 fallback
+                // 사용자가 공유 취소 시 fallback
             }
         }
 
-        // 데스크탑: 링크 복사 + 안내 토스트
+        // 데스크탑 & fallback: 링크 복사 + 안내 토스트
         try {
             await navigator.clipboard.writeText(url);
         } catch {
@@ -197,10 +201,10 @@ export default function ShareButton({ title, description, imageUrl }: ShareButto
                     </svg>
                 </button>
 
-                {/* 인스타그램 토스트 메시지 */}
+                {/* 인스타그램 토스트 메시지 (화면 하단 고정) */}
                 {instaToast && (
-                    <div className="absolute top-full right-0 mt-2 bg-slate-800 text-white text-xs font-medium px-3 py-2 rounded-lg shadow-lg whitespace-nowrap z-50 animate-fade-in">
-                        링크가 복사되었어요! 인스타그램에 붙여넣기 해주세요 📋
+                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-2xl whitespace-nowrap z-[9999] animate-fade-in">
+                        📋 링크가 복사되었어요! 인스타그램에 붙여넣기 해주세요
                     </div>
                 )}
 

@@ -4,6 +4,9 @@ import { getSortedPostsData, resolveNanobanana } from '@/lib/posts';
 import { createClient } from '@supabase/supabase-js';
 import LivePostStats from '@/components/LivePostStats';
 import PostListWithToggle from '@/components/PostListWithToggle';
+import ShareButton from '@/components/ShareButton';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
 
 // ISR: 1시간마다 재생성 → 조회수 변동 반영
 export const revalidate = 3600;
@@ -62,11 +65,11 @@ export default async function Home() {
               <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
               <span>→</span>
               <Link href={`/category/${featuredPost.category.toLowerCase().replace(/ /g, '-')}`} className="hover:text-blue-600 transition-colors">{featuredPost.category}</Link>
-              <button className="ml-4 p-1 hover:bg-slate-50 rounded-full transition-colors" title="Share this article">
-                <svg className="w-4 h-4 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-              </button>
+              <ShareButton
+                title={featuredPost.title}
+                description={featuredPost.excerpt}
+                imageUrl={featuredPost.image ? (featuredPost.image.startsWith('http') ? featuredPost.image : `${siteUrl}${featuredPost.image}`) : undefined}
+              />
             </div>
 
             <Link href={`/blog/${featuredPost.slug}`}>
