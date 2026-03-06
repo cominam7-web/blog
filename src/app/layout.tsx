@@ -41,6 +41,7 @@ export const metadata: Metadata = {
     google: "google3019d64a5a71b97e",
     other: {
       "naver-site-verification": ["7b67d40bb0f551ce92c6af50b38975c1eb1fbb96"],
+      "msvalidate.01": ["C550A62A5A093247AE67ED0859653CB1"],
     },
   },
   openGraph: {
