@@ -12,6 +12,13 @@ interface Post {
     status: string;
     views: number;
     created_at: string;
+    category: string;
+}
+
+function extractCategory(content?: string): string {
+    if (!content) return 'Uncategorized';
+    const match = content.match(/category:\s*(.+)/);
+    return match ? match[1].trim() : 'Uncategorized';
 }
 
 export default function AdminPostsPage() {
@@ -19,15 +26,24 @@ export default function AdminPostsPage() {
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState<string | null>(null);
     const [search, setSearch] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
     const router = useRouter();
 
     useEffect(() => {
         adminFetch('/api/admin/posts')
             .then(r => r.json())
-            .then(d => setPosts(d.posts || []))
+            .then(d => {
+                const postsWithCategory = (d.posts || []).map((p: any) => ({
+                    ...p,
+                    category: extractCategory(p.content),
+                }));
+                setPosts(postsWithCategory);
+            })
             .catch(console.error)
             .finally(() => setLoading(false));
     }, []);
+
+    const categories = ['All', ...Array.from(new Set(posts.map(p => p.category))).sort()];
 
     const handleDelete = async (slug: string, title: string) => {
         if (!confirm(`"${title}" 글을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
@@ -46,10 +62,12 @@ export default function AdminPostsPage() {
         setDeleting(null);
     };
 
-    const filtered = posts.filter(p =>
-        p.title.toLowerCase().includes(search.toLowerCase()) ||
-        p.slug.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = posts.filter(p => {
+        const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase()) ||
+            p.slug.toLowerCase().includes(search.toLowerCase());
+        const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
 
     return (
         <div className="p-4 md:p-8 max-w-6xl">
@@ -63,8 +81,8 @@ export default function AdminPostsPage() {
                 </Link>
             </div>
 
-            {/* Search */}
-            <div className="mb-6">
+            {/* Search & Category Filter */}
+            <div className="mb-6 space-y-3">
                 <input
                     type="text"
                     value={search}
@@ -72,6 +90,25 @@ export default function AdminPostsPage() {
                     placeholder="Search posts..."
                     className="w-full max-w-md border border-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+                <div className="flex flex-wrap gap-2">
+                    {categories.map(cat => (
+                        <button
+                            key={cat}
+                            onClick={() => setSelectedCategory(cat)}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-full transition-colors ${
+                                selectedCategory === cat
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                        >
+                            {cat}
+                            {cat === 'All'
+                                ? ` (${posts.length})`
+                                : ` (${posts.filter(p => p.category === cat).length})`
+                            }
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {loading ? (
@@ -93,6 +130,7 @@ export default function AdminPostsPage() {
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-3 text-[11px] text-slate-400 mb-3">
+                                    <span className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold">{post.category}</span>
                                     <span>{new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
                                     <span>{(post.views || 0).toLocaleString()} views</span>
                                 </div>
@@ -121,6 +159,7 @@ export default function AdminPostsPage() {
                             <thead>
                                 <tr className="border-b border-slate-200 bg-slate-50">
                                     <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Title</th>
+                                    <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Category</th>
                                     <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Status</th>
                                     <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Views</th>
                                     <th className="text-left text-[10px] font-black text-slate-500 uppercase tracking-widest px-4 py-3">Date</th>
@@ -135,6 +174,11 @@ export default function AdminPostsPage() {
                                                 {post.title}
                                             </Link>
                                             <p className="text-[11px] text-slate-400 mt-0.5">{post.slug}</p>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
+                                                {post.category}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>

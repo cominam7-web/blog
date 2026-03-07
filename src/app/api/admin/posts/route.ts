@@ -12,7 +12,7 @@ export async function GET() {
     const sb = getServiceSupabase();
     const { data, error } = await sb
         .from('posts')
-        .select('slug, title, excerpt, status, views, created_at')
+        .select('slug, title, excerpt, status, views, created_at, content')
         .order('created_at', { ascending: false });
 
     if (error) {
