@@ -32,8 +32,8 @@ export const metadata: Metadata = {
     default: "Ilsanggam Life Studio | 최고의 생활 정보 저장소",
     template: "%s | Ilsanggam Life Studio"
   },
-  description: "Ilsanggam Life Studio는 전문적인 생활 정보와 라이프스타일 팁을 AI 기술로 자동화하여 전달하는 프리미엄 블로그입니다.",
-  keywords: ["Ilsanggam Life Studio", "생활 정보", "라이프스타일", "AI 블로그", "일상감", "생활 꿀팁", "정부 지원금", "절약"],
+  description: "일상감 라이프 스튜디오는 건강, 생활 꿀팁, 테크, 엔터테인먼트까지 일상에 감각을 더하는 실용 정보 블로그입니다.",
+  keywords: ["일상감 라이프 스튜디오", "생활 정보", "라이프스타일", "건강 정보", "일상감", "생활 꿀팁", "정부 지원금", "절약", "테크", "엔터테인먼트"],
   authors: [{ name: "Ilsanggam Life Studio" }],
   alternates: {
     canonical: '/',
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Ilsanggam Life Studio | 최고의 생활 정보 저장소",
-    description: "전문적인 생활 정보와 라이프스타일 팁을 제공하는 프리미엄 자동화 블로그",
+    description: "건강, 생활 꿀팁, 테크, 엔터테인먼트까지 일상에 감각을 더하는 실용 정보 블로그",
     type: "website",
     locale: "ko_KR",
     siteName: "Ilsanggam Life Studio",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: "Ilsanggam Life Studio | 최고의 생활 정보 저장소",
-    description: "전문적인 생활 정보와 라이프스타일 팁을 제공하는 프리미엄 자동화 블로그",
+    description: "건강, 생활 꿀팁, 테크, 엔터테인먼트까지 일상에 감각을 더하는 실용 정보 블로그",
     images: ['/og-default.svg'],
   },
   other: {
