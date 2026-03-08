@@ -32,6 +32,7 @@ import PostStats from '@/components/PostStats';
 import Comments from '@/components/Comments';
 import ShareButton from '@/components/ShareButton';
 import AdBanner from '@/components/AdBanner';
+import NewsletterForm from '@/components/NewsletterForm';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
 
@@ -151,10 +152,18 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
         ],
     };
 
-    // Related posts (same category, max 3)
+    // Related posts: scored by category match (+2) and shared tags (+1 each)
     const allPosts = getSortedPostsData();
+    const currentTags = new Set(postData.tags);
     const relatedPosts = allPosts
-        .filter(p => p.category === postData.category && p.slug !== slug)
+        .filter(p => p.slug !== slug)
+        .map(p => {
+            const categoryScore = p.category === postData.category ? 2 : 0;
+            const tagScore = p.tags.filter(t => currentTags.has(t)).length;
+            return { ...p, _score: categoryScore + tagScore };
+        })
+        .filter(p => p._score > 0)
+        .sort((a, b) => b._score - a._score || new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 3)
         .map(p => ({ ...p, image: resolveNanobanana(p.image || '') }));
 
@@ -351,6 +360,9 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                             </div>
                         </div>
                     )}
+
+                    {/* Newsletter CTA */}
+                    <NewsletterForm className="mt-10" />
 
                     {/* Ad: 댓글 위 */}
                     <AdBanner slot="before-comments" format="auto" className="mt-8" />
