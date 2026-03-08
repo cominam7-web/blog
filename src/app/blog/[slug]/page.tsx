@@ -33,6 +33,7 @@ import Comments from '@/components/Comments';
 import ShareButton from '@/components/ShareButton';
 import AdBanner from '@/components/AdBanner';
 import NewsletterForm from '@/components/NewsletterForm';
+import CoupangBanner from '@/components/CoupangBanner';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
 
@@ -329,6 +330,9 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                             </div>
                         </div>
                     )}
+
+                    {/* Coupang Partners */}
+                    <CoupangBanner className="mt-8" />
 
                     {/* Share & Footer Info */}
                     <div className="mt-8 pt-8 border-t-2 border-slate-900">
