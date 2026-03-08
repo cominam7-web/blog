@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { rateLimit } from '@/lib/rate-limit';
 
 // Vercel Pro: 최대 300초 / Hobby: 10초 (Gemini 생성에 6~12초 필요)
 export const maxDuration = 60;
@@ -29,6 +30,13 @@ export async function GET(request: NextRequest) {
     const prompt = request.nextUrl.searchParams.get('prompt');
     if (!prompt) {
         return NextResponse.json({ error: 'Missing prompt' }, { status: 400 });
+    }
+
+    // Rate limiting: IP당 분당 30회 (이미지 캐시 히트는 빠르므로 넉넉하게)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const { success: rlOk } = rateLimit(`genimg:${ip}`, { limit: 30, windowMs: 60_000 });
+    if (!rlOk) {
+        return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }
 
     const styledPrompt = buildStyledPrompt(prompt.slice(0, 800));

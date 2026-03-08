@@ -1,7 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { rateLimit } from '@/lib/rate-limit';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+    // Rate limiting: IP당 분당 30회
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const { success: rlOk } = rateLimit(`stats:${ip}`, { limit: 30, windowMs: 60_000 });
+    if (!rlOk) {
+        return NextResponse.json({}, { status: 429 });
+    }
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
     if (!url || !key || !url.startsWith('http')) {

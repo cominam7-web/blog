@@ -29,6 +29,18 @@ export async function POST(request: NextRequest) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
+
+        // Magic bytes 검증 (MIME type 스푸핑 방지)
+        const isValidImage = (
+            (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) || // JPEG
+            (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) || // PNG
+            (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+             buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) || // WebP
+            (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) // GIF
+        );
+        if (!isValidImage) {
+            return NextResponse.json({ error: 'File content does not match an allowed image format.' }, { status: 400 });
+        }
         const hash = crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 12);
         const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
         const fileName = `${Date.now()}-${hash}.${ext}`;

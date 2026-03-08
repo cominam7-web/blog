@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
     try {
         const { slug } = await request.json();
         if (!slug || typeof slug !== 'string') {
             return NextResponse.json({ error: 'Invalid slug' }, { status: 400 });
+        }
+
+        // Rate limiting: IP+slug당 분당 3회 (조회수 조작 방지)
+        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+        const { success: rlOk } = rateLimit(`view:${ip}:${slug}`, { limit: 3, windowMs: 60_000 });
+        if (!rlOk) {
+            return NextResponse.json({ success: true, views: 0 });
         }
 
         const supabase = createClient(

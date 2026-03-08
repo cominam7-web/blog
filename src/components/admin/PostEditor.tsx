@@ -8,7 +8,7 @@ import rehypeRaw from 'rehype-raw';
 import { adminFetch } from '@/lib/admin-fetch';
 import { getSupabase } from '@/lib/supabase';
 
-const CATEGORIES = ['Hacks', 'Tech', 'Entertainment', 'Health', 'Reviews', 'Deals', 'Best Picks'];
+import { CATEGORIES } from '@/lib/categories';
 
 interface PostEditorProps {
     mode: 'create' | 'edit';

@@ -35,10 +35,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
     }
 
-    // Generate slug
+    // Generate slug (초 단위 + 랜덤 접미사로 충돌 방지)
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
-    const slug = `post-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+    const randomSuffix = Math.random().toString(36).slice(2, 6);
+    const slug = `post-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}-${randomSuffix}`;
     const dateStr = now.toISOString().split('T')[0];
 
     // Build frontmatter

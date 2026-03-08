@@ -6,6 +6,27 @@ import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+
+// rehype-sanitize 스키마: 기본 + img/strong/a 등 블로그에 필요한 태그 허용
+const sanitizeSchema = {
+    ...defaultSchema,
+    attributes: {
+        ...defaultSchema.attributes,
+        img: ['src', 'alt', 'width', 'height', 'className'],
+        a: ['href', 'target', 'rel', 'className', 'style'],
+        div: ['className', 'style'],
+        span: ['className', 'style'],
+        svg: ['className', 'fill', 'stroke', 'viewBox', 'style', 'width', 'height'],
+        path: ['d', 'strokeLinecap', 'strokeLinejoin', 'strokeWidth', 'fill'],
+    },
+    tagNames: [
+        ...(defaultSchema.tagNames || []),
+        'img', 'strong', 'em', 'del', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ul', 'ol', 'li', 'blockquote',
+        'pre', 'code', 'hr', 'br', 'a', 'div', 'span', 'svg', 'path',
+    ],
+};
 import ViewTracker from '@/components/ViewTracker';
 import PostStats from '@/components/PostStats';
 import Comments from '@/components/Comments';
@@ -30,7 +51,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         };
     }
 
-    const ogImage = post.image ? resolveNanobanana(post.image) : undefined;
+    const ogImage = post.image ? resolveNanobanana(post.image) : '/og-default.svg';
 
     return {
         title: post.title,
@@ -46,13 +67,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             publishedTime: post.date,
             tags: post.tags,
             url: `${siteUrl}/blog/${slug}`,
-            ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630, alt: post.title }] }),
+            images: [{ url: ogImage, width: 1200, height: 630, alt: post.title }],
         },
         twitter: {
             card: 'summary_large_image',
             title: post.title,
             description: post.excerpt,
-            ...(ogImage && { images: [ogImage] }),
+            images: [ogImage],
         },
     };
 }
@@ -186,7 +207,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     <div className="prose prose-slate prose-base md:prose-lg lg:prose-xl max-w-none prose-headings:text-slate-950 prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase prose-strong:text-slate-900 prose-a:text-blue-600">
                         <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeRaw]}
+                            rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
                             components={{
                                 // p 안에 img가 있으면 div로 교체 (하이드레이션 에러 방지)
                                 p: ({ node, children, ...props }) => {

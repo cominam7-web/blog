@@ -2,12 +2,10 @@ import { getSortedPostsData, resolveNanobanana } from '@/lib/posts';
 import Link from 'next/link';
 import PostListWithToggle from '@/components/PostListWithToggle';
 
+import { CATEGORY_SLUGS } from '@/lib/categories';
+
 export async function generateStaticParams() {
-    const categories = [
-        'latest', 'tech', 'best-picks', 'entertainment', 'health',
-        'reviews', 'home-&-garden', 'deals', 'comparisons', 'hacks'
-    ];
-    return categories.map((cat) => ({
+    return CATEGORY_SLUGS.map((cat) => ({
         category: cat,
     }));
 }

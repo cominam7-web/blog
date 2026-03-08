@@ -1,6 +1,12 @@
 import { searchPosts, resolveNanobanana } from '@/lib/posts';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Search',
+    robots: { index: false, follow: true },
+};
 
 async function SearchResults({ query }: { query: string }) {
     const rawResults = query ? searchPosts(query) : [];
