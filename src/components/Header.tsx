@@ -427,6 +427,9 @@ export default function Header() {
                             <a href="#" className="w-7 h-7 border-2 border-slate-900 rounded-full flex items-center justify-center hover:bg-slate-900 hover:text-white transition-colors" aria-label="YouTube">
                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z" /></svg>
                             </a>
+                            <a href="http://pf.kakao.com/_aWxnZX" target="_blank" rel="noopener noreferrer" className="w-7 h-7 border-2 border-slate-900 rounded-full flex items-center justify-center hover:bg-[#FEE500] hover:border-[#FEE500] transition-colors" aria-label="카카오 채널">
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3C6.477 3 2 6.463 2 10.691c0 2.65 1.753 4.992 4.416 6.376l-1.128 4.147a.5.5 0 00.768.544l4.87-3.214c.357.031.718.047 1.074.047 5.523 0 10-3.463 10-7.9S17.523 3 12 3z" /></svg>
+                            </a>
                         </div>
                         <div className="h-6 w-[2px] bg-slate-200 hidden md:block"></div>
 
