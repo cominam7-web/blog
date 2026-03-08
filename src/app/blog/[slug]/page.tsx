@@ -31,6 +31,7 @@ import ViewTracker from '@/components/ViewTracker';
 import PostStats from '@/components/PostStats';
 import Comments from '@/components/Comments';
 import ShareButton from '@/components/ShareButton';
+import AdBanner from '@/components/AdBanner';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
 
@@ -299,6 +300,9 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </ReactMarkdown>
                     </div>
 
+                    {/* Ad: 본문 하단 */}
+                    <AdBanner slot="post-bottom" format="horizontal" className="mt-8" />
+
                     {/* Tags Footer */}
                     {postData.tags.length > 0 && (
                         <div className="mt-12 pt-8 border-t border-dashed border-slate-200">
@@ -347,6 +351,9 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                             </div>
                         </div>
                     )}
+
+                    {/* Ad: 댓글 위 */}
+                    <AdBanner slot="before-comments" format="auto" className="mt-8" />
 
                     {/* Comment Section */}
                     <Comments slug={slug} />
