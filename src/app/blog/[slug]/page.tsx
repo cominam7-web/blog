@@ -34,6 +34,7 @@ import ShareButton from '@/components/ShareButton';
 import AdBanner from '@/components/AdBanner';
 import NewsletterForm from '@/components/NewsletterForm';
 import CoupangBanner from '@/components/CoupangBanner';
+import { PILLAR_PAGES } from '@/lib/pillar-pages';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
 
@@ -333,6 +334,26 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
 
                     {/* Coupang Partners */}
                     <CoupangBanner className="mt-8" />
+
+                    {/* Pillar Page Guide Banner */}
+                    {(() => {
+                        const guide = PILLAR_PAGES.find(p => p.category.toLowerCase() === postData.category?.toLowerCase());
+                        if (!guide) return null;
+                        return (
+                            <Link
+                                href={`/guide/${guide.slug}`}
+                                className="block mt-8 p-5 bg-slate-50 border border-slate-200 rounded-sm hover:border-blue-300 hover:bg-blue-50/50 transition-all group"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">{guide.category} 종합 가이드</p>
+                                        <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{guide.title}</p>
+                                    </div>
+                                    <span className="text-slate-400 group-hover:text-blue-600 transition-colors text-lg">&rarr;</span>
+                                </div>
+                            </Link>
+                        );
+                    })()}
 
                     {/* Share & Footer Info */}
                     <div className="mt-8 pt-8 border-t-2 border-slate-900">
