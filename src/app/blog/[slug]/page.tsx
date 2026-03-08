@@ -19,6 +19,7 @@ const sanitizeSchema = {
         span: ['className', 'style'],
         svg: ['className', 'fill', 'stroke', 'viewBox', 'style', 'width', 'height'],
         path: ['d', 'strokeLinecap', 'strokeLinejoin', 'strokeWidth', 'fill'],
+        h1: ['id'], h2: ['id'], h3: ['id'], h4: ['id'], h5: ['id'], h6: ['id'],
     },
     tagNames: [
         ...(defaultSchema.tagNames || []),
@@ -34,6 +35,8 @@ import ShareButton from '@/components/ShareButton';
 import AdBanner from '@/components/AdBanner';
 import NewsletterForm from '@/components/NewsletterForm';
 import CoupangBanner from '@/components/CoupangBanner';
+import ReadingProgressBar from '@/components/ReadingProgressBar';
+import TableOfContents from '@/components/TableOfContents';
 import { PILLAR_PAGES } from '@/lib/pillar-pages';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
@@ -169,8 +172,24 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
         .slice(0, 3)
         .map(p => ({ ...p, image: resolveNanobanana(p.image || '') }));
 
+    // Helper to generate heading ID from text content
+    const generateHeadingId = (children: React.ReactNode): string => {
+        const text = typeof children === 'string'
+            ? children
+            : Array.isArray(children)
+                ? children.map((c) => (typeof c === 'string' ? c : '')).join('')
+                : '';
+        return text
+            .toLowerCase()
+            .replace(/[^a-z0-9가-힣ㄱ-ㅎㅏ-ㅣ\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+    };
+
     return (
         <article className="min-h-screen bg-white">
+            <ReadingProgressBar />
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -248,11 +267,22 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </div>
                     )}
 
+                    <TableOfContents />
+
                     <div className="prose prose-slate prose-base md:prose-lg lg:prose-xl max-w-none prose-headings:text-slate-950 prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase prose-strong:text-slate-900 prose-a:text-blue-600">
                         <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
                             components={{
+                                // h2/h3: auto-generate anchor IDs for TOC
+                                h2: ({ node, children, ...props }) => {
+                                    const id = generateHeadingId(children);
+                                    return <h2 id={id} {...props}>{children}</h2>;
+                                },
+                                h3: ({ node, children, ...props }) => {
+                                    const id = generateHeadingId(children);
+                                    return <h3 id={id} {...props}>{children}</h3>;
+                                },
                                 // p 안에 img가 있으면 div로 교체 (하이드레이션 에러 방지)
                                 p: ({ node, children, ...props }) => {
                                     const hasImage = (node?.children ?? []).some(

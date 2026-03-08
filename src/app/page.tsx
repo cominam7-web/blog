@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import LivePostStats from '@/components/LivePostStats';
 import PostListWithToggle from '@/components/PostListWithToggle';
 import ShareButton from '@/components/ShareButton';
+import PopularPosts from '@/components/PopularPosts';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
 
@@ -134,6 +135,9 @@ export default async function Home() {
             </Link>
           </section>
         )}
+
+        {/* Popular Posts - 조회수 상위 5개 */}
+        <PopularPosts />
 
         {/* Latest Stories - 뷰 토글 + 검색 + 페이지네이션 */}
         <PostListWithToggle
