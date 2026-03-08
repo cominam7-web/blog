@@ -84,6 +84,9 @@ export default function Comments({ slug }: { slug: string }) {
             provider,
             options: {
                 redirectTo: `${window.location.origin}/blog/${slug}#comments`,
+                ...(provider === 'kakao' && {
+                    scopes: 'profile_nickname profile_image account_email',
+                }),
             },
         });
         if (error) {
