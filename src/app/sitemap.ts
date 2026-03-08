@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { getSortedPostsData } from '@/lib/posts'
+import { CATEGORY_SLUGS } from '@/lib/categories'
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr'
 
@@ -17,8 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         };
     })
 
-    const categories = ['latest', 'hacks', 'tech', 'entertainment', 'health', 'reviews', 'deals', 'best-picks'];
-    const categoryUrls = categories.map((cat) => ({
+    const categoryUrls = CATEGORY_SLUGS.map((cat) => ({
         url: `${baseUrl}/category/${cat}`,
         lastModified: new Date().toISOString(),
         changeFrequency: 'daily' as const,

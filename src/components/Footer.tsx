@@ -16,7 +16,7 @@ export default function Footer() {
                     © {new Date().getFullYear()} Ilsanggam Life Studio. All rights reserved.
                 </div>
 
-                <nav className="flex items-center gap-8 text-sm font-medium text-slate-600">
+                <nav className="flex items-center gap-6 text-sm font-medium text-slate-600 flex-wrap justify-center">
                     <a href="/" className="hover:text-blue-600 transition-colors">
                         Home
                     </a>
@@ -29,6 +29,12 @@ export default function Footer() {
                     <Link href="/privacy" className="hover:text-blue-600 transition-colors">
                         Privacy
                     </Link>
+                    <a href="/feed.xml" className="hover:text-blue-600 transition-colors" title="RSS Feed">
+                        RSS
+                    </a>
+                    <a href="/sitemap.xml" className="hover:text-blue-600 transition-colors" title="Sitemap">
+                        Sitemap
+                    </a>
                 </nav>
             </div>
         </footer>

@@ -1,8 +1,36 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
+
+export const metadata: Metadata = {
+    title: 'About - 일상감 라이프 스튜디오 소개',
+    description: 'Ilsanggam Life Studio는 AI 기술로 생활 정보, 절약 팁, 정부 지원금 등 실용적인 콘텐츠를 전달하는 프리미엄 블로그입니다.',
+    alternates: { canonical: '/about' },
+    openGraph: {
+        title: 'About - 일상감 라이프 스튜디오 소개',
+        description: 'AI 기술로 생활 정보와 라이프스타일 팁을 전달하는 프리미엄 블로그',
+        url: `${siteUrl}/about`,
+        images: [{ url: '/og-default.svg', width: 1200, height: 630, alt: 'About Ilsanggam Life Studio' }],
+    },
+};
 
 export default function About() {
+    const orgSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Ilsanggam Life Studio',
+        url: siteUrl,
+        description: 'AI 기술로 생활 정보, 절약 팁, 정부 지원금 등 실용적인 콘텐츠를 전달하는 프리미엄 블로그',
+        sameAs: [],
+    };
+
     return (
         <main className="min-h-screen bg-white py-12 px-4 sm:px-6 lg:px-8">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+            />
             <div className="max-w-3xl mx-auto">
                 {/* Breadcrumb Section */}
                 <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-400 mb-8 uppercase">

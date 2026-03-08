@@ -108,6 +108,10 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
         ? (postData.image.startsWith('http') ? postData.image : `${siteUrl}${postData.image}`)
         : undefined;
 
+    // Reading time estimate
+    const wordCount = postData.content.replace(/<[^>]*>/g, '').length;
+    const readingTime = Math.max(1, Math.round(wordCount / 500)); // ~500 chars/min for Korean
+
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'Article',
@@ -133,11 +137,32 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
         keywords: postData.tags.join(', '),
     };
 
+    const breadcrumbLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+            { '@type': 'ListItem', position: 2, name: postData.category, item: `${siteUrl}/category/${postData.category.toLowerCase().replace(/ /g, '-')}` },
+            { '@type': 'ListItem', position: 3, name: postData.title, item: `${siteUrl}/blog/${slug}` },
+        ],
+    };
+
+    // Related posts (same category, max 3)
+    const allPosts = getSortedPostsData();
+    const relatedPosts = allPosts
+        .filter(p => p.category === postData.category && p.slug !== slug)
+        .slice(0, 3)
+        .map(p => ({ ...p, image: resolveNanobanana(p.image || '') }));
+
     return (
         <article className="min-h-screen bg-white">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
             />
             {/* 조회수 자동 기록 (클라이언트, 세션당 1회) */}
             <ViewTracker slug={slug} />
@@ -172,6 +197,10 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                             📅 {postData.date}
                         </span>
                         <PostStats slug={slug} />
+                        <span className="text-slate-300">|</span>
+                        <span className="flex items-center gap-1 uppercase tracking-wider">
+                            ⏱ {readingTime}분 읽기
+                        </span>
                     </div>
 
                     {/* Tags */}
@@ -295,6 +324,26 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                             </div>
                         </div>
                     </div>
+
+                    {/* Related Posts */}
+                    {relatedPosts.length > 0 && (
+                        <div className="mt-12 pt-8 border-t border-dashed border-slate-200">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Related Posts</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                {relatedPosts.map((rp) => (
+                                    <Link key={rp.slug} href={`/blog/${rp.slug}`} className="group block">
+                                        {rp.image && (
+                                            <div className="relative aspect-[16/9] overflow-hidden rounded-sm bg-slate-100 mb-2">
+                                                <Image src={rp.image} alt={rp.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 250px" />
+                                            </div>
+                                        )}
+                                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug line-clamp-2">{rp.title}</h4>
+                                        <p className="text-xs text-slate-400 mt-1">{rp.date}</p>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Comment Section */}
                     <Comments slug={slug} />

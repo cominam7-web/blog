@@ -55,8 +55,30 @@ export default async function Home() {
   // Latest Stories: 날짜 내림차순 (가장 최근 글이 맨 왼쪽), featured 제외
   const remainingPosts = allPostsData.filter(p => p.slug !== featuredPost?.slug);
 
+  const websiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Ilsanggam Life Studio',
+    url: siteUrl,
+    description: '전문적인 생활 정보와 라이프스타일 팁을 AI 기술로 자동화하여 전달하는 프리미엄 블로그',
+    publisher: {
+      '@type': 'Organization',
+      name: 'Ilsanggam Life Studio',
+      url: siteUrl,
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${siteUrl}/search?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <main className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Hero Feature Section - Lifehacker Style */}
         {featuredPost && (

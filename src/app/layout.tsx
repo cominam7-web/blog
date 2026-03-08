@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: "%s | Ilsanggam Life Studio"
   },
   description: "Ilsanggam Life Studio는 전문적인 생활 정보와 라이프스타일 팁을 AI 기술로 자동화하여 전달하는 프리미엄 블로그입니다.",
-  keywords: ["Ilsanggam Life Studio", "생활 정보", "라이프스타일", "AI 블로그", "일상감"],
+  keywords: ["Ilsanggam Life Studio", "생활 정보", "라이프스타일", "AI 블로그", "일상감", "생활 꿀팁", "정부 지원금", "절약"],
   authors: [{ name: "Ilsanggam Life Studio" }],
   alternates: {
     canonical: '/',
@@ -51,11 +51,16 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     siteName: "Ilsanggam Life Studio",
     url: siteUrl,
+    images: [{ url: '/og-default.svg', width: 1200, height: 630, alt: 'Ilsanggam Life Studio' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Ilsanggam Life Studio | 최고의 생활 정보 저장소",
     description: "전문적인 생활 정보와 라이프스타일 팁을 제공하는 프리미엄 자동화 블로그",
+    images: ['/og-default.svg'],
+  },
+  other: {
+    'theme-color': '#0f172a',
   },
 };
 

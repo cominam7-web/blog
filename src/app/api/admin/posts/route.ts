@@ -83,5 +83,25 @@ ${content}`;
     revalidatePath(`/blog/${slug}`);
     revalidatePath('/sitemap.xml');
 
+    // 4. Auto IndexNow submission
+    const indexNowKey = process.env.INDEXNOW_KEY;
+    if (indexNowKey) {
+        const indexSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
+        try {
+            await fetch('https://api.indexnow.org/indexnow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                body: JSON.stringify({
+                    host: new URL(indexSiteUrl).hostname,
+                    key: indexNowKey,
+                    keyLocation: `${indexSiteUrl}/${indexNowKey}.txt`,
+                    urlList: [`${indexSiteUrl}/blog/${slug}`, indexSiteUrl],
+                }),
+            });
+        } catch {
+            // IndexNow failure is non-critical
+        }
+    }
+
     return NextResponse.json({ success: true, slug });
 }

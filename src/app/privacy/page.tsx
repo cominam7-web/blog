@@ -1,4 +1,18 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
+
+export const metadata: Metadata = {
+    title: '개인정보처리방침 - Privacy Policy',
+    description: 'Ilsanggam Life Studio 개인정보처리방침. 수집 항목, 쿠키 정책, 제3자 광고 서비스, 개인정보 보유 및 파기 안내.',
+    alternates: { canonical: '/privacy' },
+    openGraph: {
+        title: '개인정보처리방침 - Ilsanggam Life Studio',
+        description: '개인정보처리방침 및 쿠키 정책 안내',
+        url: `${siteUrl}/privacy`,
+    },
+};
 
 export default function Privacy() {
     return (
