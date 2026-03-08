@@ -92,11 +92,14 @@ export default function RootLayout({
         )}
         {/* Google AdSense */}
         {adsenseId && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
-            crossOrigin="anonymous"
-          />
+          <>
+            <meta name="google-adsense-account" content={adsenseId} />
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
+              crossOrigin="anonymous"
+            />
+          </>
         )}
       </head>
       <body
