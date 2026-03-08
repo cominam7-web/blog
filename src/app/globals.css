@@ -76,6 +76,11 @@ body {
   margin-bottom: 1em !important;
 }
 
+/* 링크가 항상 인라인으로 렌더링되도록 보장 */
+.prose a {
+  display: inline !important;
+}
+
 @media (prefers-color-scheme: dark) {
   .prose {
     --tw-prose-body: #374151;

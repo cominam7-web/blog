@@ -17,41 +17,80 @@ export async function GET(
     const filePath = `src/posts/${slug}.md`;
     const rawContent = await getFileContent(filePath);
 
-    if (!rawContent) {
+    if (rawContent) {
+        // GitHub 파일 존재 → 파싱
+        const { data: frontmatter, content } = matter(rawContent);
+
+        let imagePrompt = '';
+        const img = frontmatter.image;
+        if (img) {
+            let input = '';
+            if (Array.isArray(img)) {
+                const first = img[0];
+                if (first !== null && typeof first === 'object') {
+                    const entries = Object.entries(first as Record<string, unknown>);
+                    input = entries.length > 0 ? String(entries[0][1] || '') : '';
+                } else {
+                    input = String(first || '');
+                }
+            } else {
+                input = String(img);
+            }
+            const match = input.match(/(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]+?)(?=[\]］]|$)/i);
+            imagePrompt = match ? match[1].trim() : input.replace(/[\[\]［］]/g, '').trim();
+        }
+
+        return NextResponse.json({
+            slug,
+            title: frontmatter.title || slug,
+            date: frontmatter.date ? String(frontmatter.date).split('T')[0] : '',
+            excerpt: frontmatter.excerpt || '',
+            category: frontmatter.category || 'Hacks',
+            tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
+            imagePrompt,
+            content: content.trim(),
+        });
+    }
+
+    // GitHub 파일 없음 → Supabase 폴백
+    const sb = getServiceSupabase();
+    const { data: sbPost } = await sb
+        .from('posts')
+        .select('title, excerpt, content, created_at')
+        .eq('slug', slug)
+        .single();
+
+    if (!sbPost) {
         return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    const { data: frontmatter, content } = matter(rawContent);
+    // Supabase content에 frontmatter가 포함되어 있을 수 있음
+    let parsedContent = sbPost.content || '';
+    let frontmatter: any = {};
+    if (parsedContent.startsWith('---')) {
+        const parsed = matter(parsedContent);
+        frontmatter = parsed.data;
+        parsedContent = parsed.content.trim();
+    }
 
-    // Extract image prompt from parsed image field
     let imagePrompt = '';
     const img = frontmatter.image;
     if (img) {
-        let input = '';
-        if (Array.isArray(img)) {
-            const first = img[0];
-            if (first !== null && typeof first === 'object') {
-                const entries = Object.entries(first as Record<string, unknown>);
-                input = entries.length > 0 ? String(entries[0][1] || '') : '';
-            } else {
-                input = String(first || '');
-            }
-        } else {
-            input = String(img);
-        }
+        const input = String(img);
         const match = input.match(/(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]+?)(?=[\]］]|$)/i);
         imagePrompt = match ? match[1].trim() : input.replace(/[\[\]［］]/g, '').trim();
     }
 
     return NextResponse.json({
         slug,
-        title: frontmatter.title || slug,
-        date: frontmatter.date ? String(frontmatter.date).split('T')[0] : '',
-        excerpt: frontmatter.excerpt || '',
+        title: frontmatter.title || sbPost.title || slug,
+        date: frontmatter.date ? String(frontmatter.date).split('T')[0] : (sbPost.created_at ? sbPost.created_at.split('T')[0] : ''),
+        excerpt: frontmatter.excerpt || sbPost.excerpt || '',
         category: frontmatter.category || 'Hacks',
         tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
         imagePrompt,
-        content: content.trim(),
+        content: parsedContent,
+        _source: 'supabase',  // 클라이언트에서 GitHub 파일 없음을 알 수 있도록
     });
 }
 

@@ -96,11 +96,14 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
 
     // Helper to render content with nanobanana tags as images
     // Also convert **bold** to <strong> for Korean text (CommonMark can't handle **bold**한글)
+    // Fix legacy 🔗 standalone links → merge into preceding paragraph as inline links
     const processedContent = postData.content
         .replace(NANOBANANA_REGEX, (match) => {
             const imageUrl = resolveNanobanana(match);
             return `![Nanobanana Image](${imageUrl})`;
         })
+        .replace(/\n\n\[🔗\s*/g, ' [')
+        .replace(/\n\[🔗\s*/g, ' [')
         .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
 
     // ShareButton에 전달할 OG 이미지 URL (전체 URL로 변환)
@@ -254,7 +257,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                                             href={href}
                                             target={isExternal ? '_blank' : undefined}
                                             rel={isExternal ? 'noopener noreferrer' : undefined}
-                                            className={isExternal ? 'block mt-3' : ''}
+                                            className={isExternal ? 'inline' : ''}
                                             style={{ color: '#2563eb', textDecoration: 'underline', fontWeight: 600 }}
                                             {...props}
                                         >
