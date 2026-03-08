@@ -5,8 +5,28 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import NewsletterForm from '@/components/NewsletterForm';
+import DownloadGuide from '@/components/DownloadGuide';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
+
+const GUIDE_DOWNLOADS: Record<string, { title: string; description: string }> = {
+    'money-saving-hacks': {
+        title: '2026 돈 아끼는 생활 꿀팁 PDF 가이드',
+        description: '정부 지원금, 세금 환급, 숨은 돈 찾기 등 핵심 절약 팁을 한 눈에 정리한 PDF를 무료로 받아보세요.',
+    },
+    'smart-tech-guide': {
+        title: '스마트 디지털 생활 PDF 가이드',
+        description: 'AI 도구, 생산성 앱, 보안 팁 등 디지털 생활 업그레이드 핵심 내용을 PDF로 정리했습니다.',
+    },
+    'health-wellness-guide': {
+        title: '건강 관리 완벽 PDF 가이드',
+        description: '건강검진 활용법, 의료비 절약, 생활 건강 상식을 한 권으로 정리한 PDF를 무료로 다운로드하세요.',
+    },
+    'entertainment-picks': {
+        title: '엔터테인먼트 추천 PDF 가이드',
+        description: '넷플릭스, 영화, K-POP, 드라마 등 정주행 필수 콘텐츠를 정리한 PDF를 받아보세요.',
+    },
+};
 
 export async function generateStaticParams() {
     return getAllPillarSlugs().map(slug => ({ slug }));
@@ -206,6 +226,16 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
                             })}
                         </div>
                     </section>
+                )}
+
+                {/* PDF Guide Download */}
+                {GUIDE_DOWNLOADS[slug] && (
+                    <DownloadGuide
+                        guideSlug={slug}
+                        title={GUIDE_DOWNLOADS[slug].title}
+                        description={GUIDE_DOWNLOADS[slug].description}
+                        className="mb-12"
+                    />
                 )}
 
                 {/* Newsletter */}
