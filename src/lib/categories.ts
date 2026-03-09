@@ -1,5 +1,5 @@
 // 카테고리 목록 - 단일 소스 (모든 컴포넌트에서 이 파일을 import)
-export const CATEGORIES = ['Hacks', 'Tech', 'Entertainment', 'Health', 'Reviews', 'Deals', 'Best Picks'] as const;
+export const CATEGORIES = ['Hacks', 'Tech', 'Entertainment', 'Health'] as const;
 
 export type Category = (typeof CATEGORIES)[number];
 

@@ -12,9 +12,6 @@ const categories = [
     { name: 'TECH', korean: '기술', href: '/category/tech' },
     { name: 'ENTERTAINMENT', korean: '엔터테인먼트', href: '/category/entertainment' },
     { name: 'HEALTH', korean: '건강', href: '/category/health' },
-    { name: 'REVIEWS', korean: '리뷰', href: '/category/reviews' },
-    { name: 'DEALS', korean: '특가', href: '/category/deals' },
-    { name: 'BEST PICKS', korean: '추천', href: '/category/best-picks' },
 ];
 
 export default function Header() {
