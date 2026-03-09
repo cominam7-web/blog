@@ -91,8 +91,8 @@ export default function TableOfContents() {
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex items-center justify-between px-5 py-3 text-left"
             >
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                    Table of Contents
+                <span className="text-xs font-bold text-slate-500">
+                    목차
                 </span>
                 <svg
                     className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -111,7 +111,7 @@ export default function TableOfContents() {
                         <li key={h.id}>
                             <button
                                 onClick={() => handleClick(h.id)}
-                                className={`block w-full text-left text-sm py-1 transition-colors duration-150 ${
+                                className={`block w-full text-left text-sm py-2 transition-colors duration-150 ${
                                     h.level === 3 ? 'pl-4' : 'pl-0'
                                 } ${
                                     activeId === h.id

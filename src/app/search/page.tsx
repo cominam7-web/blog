@@ -23,12 +23,12 @@ async function SearchResults({ query }: { query: string }) {
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 {/* Search Header */}
                 <div className="border-b-2 border-slate-900 pb-8 mb-12">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-2">Search Results</p>
-                    <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter uppercase">
-                        {query ? `"${query}"` : 'All Stories'}
+                    <p className="text-xs font-bold tracking-wide text-blue-600 mb-2">검색 결과</p>
+                    <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter">
+                        {query ? `"${query}"` : '전체 글'}
                     </h1>
                     <p className="mt-4 text-slate-400 text-sm font-bold uppercase tracking-widest">
-                        {results.length} {results.length === 1 ? 'Result' : 'Results'} Found
+                        {results.length}건
                     </p>
                 </div>
 
@@ -55,16 +55,16 @@ async function SearchResults({ query }: { query: string }) {
                                     )}
                                 </Link>
                                 <div className="flex-grow space-y-4">
-                                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{post.category}</p>
+                                    <p className="text-xs font-bold text-blue-600 uppercase tracking-widest">{post.category}</p>
                                     <Link href={`/blog/${post.slug}`}>
-                                        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 group-hover:text-blue-600 transition-colors leading-tight tracking-tight uppercase">
+                                        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-tight tracking-tight">
                                             {post.title}
                                         </h2>
                                     </Link>
                                     <p className="text-slate-500 text-base leading-relaxed line-clamp-2 italic">
                                         {post.excerpt}
                                     </p>
-                                    <div className="pt-2 flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    <div className="pt-2 flex items-center gap-4 text-xs font-bold text-slate-400">
                                         <span>{post.date}</span>
                                         <span>•</span>
                                         <span>{post.category}</span>
@@ -76,10 +76,10 @@ async function SearchResults({ query }: { query: string }) {
                 ) : (
                     <div className="text-center py-32 bg-slate-50 border border-dashed border-slate-200 rounded-sm">
                         <div className="text-4xl mb-6">🔍</div>
-                        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter mb-4">No results found</h2>
-                        <p className="text-slate-400 font-medium italic mb-8">Try adjusting your search keywords or explore categories.</p>
-                        <Link href="/" className="px-6 py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 transition-colors">
-                            Back to Home
+                        <h2 className="text-2xl font-bold text-slate-900 tracking-tighter mb-4">검색 결과가 없습니다</h2>
+                        <p className="text-slate-400 font-medium italic mb-8">다른 검색어를 입력하거나 카테고리를 둘러보세요.</p>
+                        <Link href="/" className="px-6 py-3 bg-slate-900 text-white text-xs font-bold hover:bg-blue-600 transition-colors">
+                            홈으로
                         </Link>
                     </div>
                 )}
@@ -97,7 +97,7 @@ export default async function SearchPage({
     const query = q || '';
 
     return (
-        <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><span className="text-slate-400 font-black uppercase tracking-widest animate-pulse">Searching...</span></div>}>
+        <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><span className="text-slate-400 font-bold uppercase tracking-widest animate-pulse">Searching...</span></div>}>
             <SearchResults query={query} />
         </Suspense>
     );

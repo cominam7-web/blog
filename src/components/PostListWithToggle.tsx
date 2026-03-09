@@ -84,14 +84,14 @@ export default function PostListWithToggle({
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search posts..."
+                        placeholder="글 검색..."
                         autoFocus
                         className="w-40 sm:w-56 px-3 py-1.5 text-sm border border-slate-300 rounded-sm focus:outline-none focus:border-slate-900 transition-colors"
                     />
                     <button
                         onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
                         className="p-1.5 text-slate-400 hover:text-slate-900 transition-colors"
-                        title="Close search"
+                        title="검색 닫기"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -101,8 +101,8 @@ export default function PostListWithToggle({
             ) : (
                 <button
                     onClick={() => setSearchOpen(true)}
-                    className="p-1.5 text-slate-400 hover:text-slate-900 border border-slate-200 hover:border-slate-900 rounded-sm transition-colors"
-                    title="Search"
+                    className="p-2 text-slate-400 hover:text-slate-900 border border-slate-200 hover:border-slate-900 rounded-sm transition-colors"
+                    title="검색"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -114,11 +114,11 @@ export default function PostListWithToggle({
             <div className="flex items-center border border-slate-200 rounded-sm overflow-hidden">
                 <button
                     onClick={() => handleViewChange('grid')}
-                    className={`p-1.5 transition-colors ${viewMode === 'grid'
+                    className={`p-2 transition-colors ${viewMode === 'grid'
                         ? 'bg-slate-900 text-white'
                         : 'text-slate-400 hover:text-slate-900'
                         }`}
-                    title="Grid view"
+                    title="그리드 보기"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -126,11 +126,11 @@ export default function PostListWithToggle({
                 </button>
                 <button
                     onClick={() => handleViewChange('list')}
-                    className={`p-1.5 transition-colors ${viewMode === 'list'
+                    className={`p-2 transition-colors ${viewMode === 'list'
                         ? 'bg-slate-900 text-white'
                         : 'text-slate-400 hover:text-slate-900'
                         }`}
-                    title="List view"
+                    title="목록 보기"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -152,8 +152,8 @@ export default function PostListWithToggle({
                             {title}
                         </h1>
                         <div className="flex items-center gap-3">
-                            <span className="text-slate-400 text-[11px] font-bold uppercase tracking-widest hidden sm:block">
-                                {displayCount} posts
+                            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest hidden sm:block">
+                                {displayCount} 개
                             </span>
                             {renderControls()}
                         </div>
@@ -166,8 +166,8 @@ export default function PostListWithToggle({
                         {title}
                     </h3>
                     <div className="flex items-center gap-3">
-                        <span className="text-slate-400 text-[11px] font-bold uppercase tracking-widest hidden sm:block">
-                            {displayCount} posts
+                        <span className="text-slate-400 text-xs font-bold uppercase tracking-widest hidden sm:block">
+                            {displayCount} 개
                         </span>
                         {renderControls()}
                     </div>
@@ -206,7 +206,7 @@ export default function PostListWithToggle({
                                         )}
                                     </Link>
                                     <div className="space-y-4 flex-grow">
-                                        <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{post.category}</p>
+                                        <p className="text-xs font-bold text-blue-600 uppercase tracking-widest">{post.category}</p>
                                         <Link href={`/blog/${post.slug}`}>
                                             <h4 className="text-2xl font-black text-slate-900 group-hover:text-blue-600 transition-colors leading-tight tracking-tight">
                                                 {post.title}
@@ -218,14 +218,14 @@ export default function PostListWithToggle({
                                         {post.tags.length > 0 && (
                                             <div className="flex flex-wrap gap-1.5 mt-2">
                                                 {post.tags.slice(0, 3).map((tag) => (
-                                                    <span key={tag} className="px-2 py-0.5 bg-slate-50 text-slate-400 text-[10px] font-bold rounded-full">
+                                                    <span key={tag} className="px-2 py-0.5 bg-slate-50 text-slate-400 text-xs font-bold rounded-full">
                                                         #{tag}
                                                     </span>
                                                 ))}
                                             </div>
                                         )}
                                     </div>
-                                    <div className="mt-6 flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                    <div className="mt-6 flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
                                         <span>{post.date}</span>
                                         <span>&bull;</span>
                                         <LivePostStats slug={post.slug} />
@@ -262,11 +262,11 @@ export default function PostListWithToggle({
                                         {/* 텍스트 정보 */}
                                         <div className="flex-grow min-w-0">
                                             <div className="flex items-center gap-3 mb-1">
-                                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest shrink-0">
+                                                <span className="text-xs font-bold text-blue-600 uppercase tracking-widest shrink-0">
                                                     {post.category}
                                                 </span>
-                                                <span className="text-[10px] text-slate-300">&bull;</span>
-                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                <span className="text-xs text-slate-300">&bull;</span>
+                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
                                                     {post.date}
                                                 </span>
                                             </div>
@@ -278,7 +278,7 @@ export default function PostListWithToggle({
                                             </p>
                                         </div>
                                         {/* 통계 (데스크톱) */}
-                                        <div className="hidden md:flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest shrink-0 pt-1">
+                                        <div className="hidden md:flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-widest shrink-0 pt-1">
                                             <LivePostStats slug={post.slug} />
                                         </div>
                                     </Link>
@@ -295,7 +295,7 @@ export default function PostListWithToggle({
                                     onClick={() => setCurrentPage(safePage - 1)}
                                     className="px-4 py-2 text-sm font-bold text-slate-600 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors"
                                 >
-                                    &larr; Prev
+                                    &larr; 이전
                                 </button>
                             )}
 
@@ -303,7 +303,7 @@ export default function PostListWithToggle({
                                 <button
                                     key={p}
                                     onClick={() => setCurrentPage(p)}
-                                    className={`w-10 h-10 flex items-center justify-center text-sm font-bold transition-colors ${p === safePage
+                                    className={`w-11 h-11 flex items-center justify-center text-sm font-bold transition-colors ${p === safePage
                                         ? 'bg-slate-900 text-white'
                                         : 'text-slate-500 border border-slate-300 hover:bg-slate-100'
                                         }`}
@@ -317,7 +317,7 @@ export default function PostListWithToggle({
                                     onClick={() => setCurrentPage(safePage + 1)}
                                     className="px-4 py-2 text-sm font-bold text-slate-600 border border-slate-300 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-colors"
                                 >
-                                    Next &rarr;
+                                    다음 &rarr;
                                 </button>
                             )}
                         </nav>

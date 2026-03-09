@@ -84,8 +84,8 @@ export default async function Home() {
         {/* Hero Feature Section - Lifehacker Style */}
         {featuredPost && (
           <section className="mb-20 text-center">
-            <div className="flex items-center justify-center gap-2 text-[10px] font-black tracking-widest text-slate-400 mb-6 uppercase">
-              <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
+            <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-wide text-slate-400 mb-6">
+              <Link href="/" className="hover:text-blue-600 transition-colors">홈</Link>
               <span>→</span>
               <Link href={`/category/${featuredPost.category.toLowerCase().replace(/ /g, '-')}`} className="hover:text-blue-600 transition-colors">{featuredPost.category}</Link>
               <ShareButton
@@ -105,9 +105,9 @@ export default async function Home() {
               {featuredPost.excerpt}
             </p>
 
-            <div className="flex items-center justify-center gap-6 text-[11px] font-bold text-slate-500 mb-10 pb-10 border-b border-dashed border-slate-300">
+            <div className="flex items-center justify-center gap-6 text-xs font-bold text-slate-500 mb-10 pb-10 border-b border-dashed border-slate-300">
               <span className="flex items-center gap-2">
-                <span className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center text-[10px]">👤</span>
+                <span className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center text-xs">👤</span>
                 Ilsanggam Life
               </span>
               <span>|</span>
@@ -150,7 +150,7 @@ export default async function Home() {
             image: p.image || '',
             tags: p.tags || [],
           }))}
-          title="Latest Stories"
+          title="최신 글"
           totalCount={remainingPosts.length}
         />
       </div>

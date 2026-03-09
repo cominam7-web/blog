@@ -39,6 +39,7 @@ import LikeButton from '@/components/LikeButton';
 import FaqSchema from '@/components/FaqSchema';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import TableOfContents from '@/components/TableOfContents';
+import ScrollToTop from '@/components/ScrollToTop';
 import { PILLAR_PAGES } from '@/lib/pillar-pages';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
@@ -209,7 +210,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
             <ViewTracker slug={slug} />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 {/* Top Breadcrumb & Share Section */}
-                <div className="flex items-center justify-center gap-2 text-[10px] font-black tracking-widest mb-6 uppercase">
+                <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-widest mb-6 uppercase">
                     <Link href="/" className="text-slate-400 hover:text-blue-600 transition-colors">Home</Link>
                     <span className="text-slate-300">→</span>
                     <Link href={`/category/${postData.category.toLowerCase().replace(/ /g, '-')}`} className="text-slate-400 hover:text-blue-600 transition-colors">
@@ -220,7 +221,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
 
                 {/* Main Heading & Excerpt */}
                 <header className="text-center mb-10 pb-10 border-b border-dashed border-slate-300">
-                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-[1.2] mb-8 tracking-tighter max-w-4xl mx-auto uppercase">
+                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-[1.2] mb-8 tracking-tighter max-w-4xl mx-auto">
                         {postData.title}
                     </h1>
                     <p className="text-xl sm:text-2xl text-slate-600 font-medium max-w-3xl mx-auto leading-relaxed italic mb-10">
@@ -228,9 +229,9 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     </p>
 
                     {/* Meta Bar */}
-                    <div className="flex items-center justify-center gap-4 sm:gap-6 text-[11px] font-bold text-slate-500 flex-wrap">
+                    <div className="flex items-center justify-center gap-4 sm:gap-6 text-xs font-bold text-slate-500 flex-wrap">
                         <span className="flex items-center gap-2">
-                            <span className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-[10px] border border-slate-200">👤</span>
+                            <span className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs border border-slate-200">👤</span>
                             <span className="text-slate-900">Ilsanggam Life</span>
                         </span>
                         <span className="text-slate-300">|</span>
@@ -336,7 +337,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                                             className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-700"
                                         />
                                         {props.alt && props.alt !== 'Nanobanana Image' && (
-                                            <p className="mt-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 italic">
+                                            <p className="mt-4 text-center text-xs font-bold uppercase tracking-widest text-slate-400 italic">
                                                 {props.alt}
                                             </p>
                                         )}
@@ -354,7 +355,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     {/* Tags Footer */}
                     {postData.tags.length > 0 && (
                         <div className="mt-12 pt-8 border-t border-dashed border-slate-200">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Tags</p>
+                            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">태그</p>
                             <div className="flex flex-wrap gap-2">
                                 {postData.tags.map((tag) => (
                                     <Link
@@ -391,7 +392,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                             >
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">{guide.category} 종합 가이드</p>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-1">{guide.category} 종합 가이드</p>
                                         <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{guide.title}</p>
                                     </div>
                                     <span className="text-slate-400 group-hover:text-blue-600 transition-colors text-lg">&rarr;</span>
@@ -408,10 +409,10 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     {/* Share & Footer Info */}
                     <div className="mt-8 pt-8 border-t-2 border-slate-900">
                         <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">End of Article</span>
+                            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">글의 끝</span>
                             <div className="flex items-center gap-4">
                                 <ShareButton title={postData.title} description={postData.excerpt} imageUrl={ogImage} />
-                                <Link href="/" className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline">Back to Home</Link>
+                                <Link href="/" className="text-xs font-bold uppercase tracking-widest text-blue-600 hover:underline">홈으로</Link>
                             </div>
                         </div>
                     </div>
@@ -425,7 +426,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     {/* Related Posts - 댓글 아래 */}
                     {relatedPosts.length > 0 && (
                         <div className="mt-12 pt-8 border-t border-dashed border-slate-200">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Related Posts</p>
+                            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6">관련 글</p>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 {relatedPosts.map((rp) => (
                                     <Link key={rp.slug} href={`/blog/${rp.slug}`} className="group block">
@@ -442,10 +443,32 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </div>
                     )}
 
-                    {/* Ad: 하단 */}
-                    <AdBanner slot="9346051403" format="auto" className="mt-8" />
+                    {/* 이전/다음 글 네비게이션 */}
+                    {(() => {
+                        const currentIndex = allPosts.findIndex(p => p.slug === slug);
+                        const prevPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+                        const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+                        if (!prevPost && !nextPost) return null;
+                        return (
+                            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {prevPost ? (
+                                    <Link href={`/blog/${prevPost.slug}`} className="group p-4 border border-slate-200 rounded-sm hover:border-blue-300 hover:bg-blue-50/30 transition-all">
+                                        <p className="text-xs font-bold text-slate-400 mb-1">&larr; 이전 글</p>
+                                        <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">{prevPost.title}</p>
+                                    </Link>
+                                ) : <div />}
+                                {nextPost ? (
+                                    <Link href={`/blog/${nextPost.slug}`} className="group p-4 border border-slate-200 rounded-sm hover:border-blue-300 hover:bg-blue-50/30 transition-all text-right">
+                                        <p className="text-xs font-bold text-slate-400 mb-1">다음 글 &rarr;</p>
+                                        <p className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">{nextPost.title}</p>
+                                    </Link>
+                                ) : <div />}
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
+            <ScrollToTop />
         </article>
     );
 }

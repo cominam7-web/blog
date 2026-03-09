@@ -149,7 +149,7 @@ export default function ShareButton({ title, description, imageUrl }: ShareButto
                 {kakaoAppKey && (
                     <button
                         onClick={handleKakaoShare}
-                        className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                        className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
                         style={{ backgroundColor: '#FEE500' }}
                         title="카카오톡 공유"
                         aria-label="카카오톡으로 공유"
@@ -163,7 +163,7 @@ export default function ShareButton({ title, description, imageUrl }: ShareButto
                 {/* X (트위터) */}
                 <button
                     onClick={handleTwitterShare}
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                    className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
                     style={{ backgroundColor: '#000000' }}
                     title="X(트위터) 공유"
                     aria-label="X(트위터)로 공유"
@@ -176,7 +176,7 @@ export default function ShareButton({ title, description, imageUrl }: ShareButto
                 {/* 페이스북 */}
                 <button
                     onClick={handleFacebookShare}
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                    className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
                     style={{ backgroundColor: '#1877F2' }}
                     title="페이스북 공유"
                     aria-label="페이스북으로 공유"
@@ -189,7 +189,7 @@ export default function ShareButton({ title, description, imageUrl }: ShareButto
                 {/* 인스타그램 */}
                 <button
                     onClick={handleInstagramShare}
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
+                    className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-70"
                     style={{
                         background: 'linear-gradient(45deg, #F58529, #DD2A7B, #8134AF, #515BD4)',
                     }}

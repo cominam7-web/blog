@@ -103,7 +103,7 @@ export default function NewsletterForm({ variant = 'card', className = '' }: New
                 </form>
             )}
             {status === 'error' && <p className="text-xs text-red-500 mt-2 text-center">{message}</p>}
-            <p className="text-[10px] text-slate-400 text-center mt-3">스팸 없이, 언제든 구독 해지 가능합니다.</p>
+            <p className="text-xs text-slate-400 text-center mt-3">스팸 없이, 언제든 구독 해지 가능합니다.</p>
         </div>
     );
 }

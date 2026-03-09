@@ -167,8 +167,8 @@ export default function Header() {
             >
                 <div className="bg-white border-2 border-slate-900 p-8 w-full max-w-sm">
                     <div className="flex items-center justify-between mb-6">
-                        <h4 className="text-xl font-black tracking-tighter text-slate-900 uppercase">
-                            {showAuthModal === 'login' ? 'Log In' : 'Sign Up'}
+                        <h4 className="text-xl font-bold tracking-tighter text-slate-900">
+                            {showAuthModal === 'login' ? '로그인' : '회원가입'}
                         </h4>
                         <button onClick={closeAuthModal} className="text-slate-400 hover:text-slate-900 transition-colors">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,18 +179,18 @@ export default function Header() {
                     <form onSubmit={handleAuthSubmit} className="space-y-4">
                         {showAuthModal === 'signup' && (
                             <div>
-                                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">닉네임 *</label>
+                                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">닉네임 *</label>
                                 <input type="text" value={authDisplayName} onChange={(e) => setAuthDisplayName(e.target.value)} required
                                     className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="표시될 이름" />
                             </div>
                         )}
                         <div>
-                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">이메일 *</label>
+                            <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">이메일 *</label>
                             <input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required
                                 className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="email@example.com" />
                         </div>
                         <div>
-                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">비밀번호 *</label>
+                            <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">비밀번호 *</label>
                             <input type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required minLength={6}
                                 className="w-full border border-slate-300 px-3 py-2.5 text-sm font-medium focus:outline-none focus:border-slate-900 transition-colors" placeholder="최소 6자" />
                         </div>
@@ -198,18 +198,18 @@ export default function Header() {
                             <p className="text-red-500 text-sm font-medium bg-red-50 px-3 py-2 border border-red-100">{authError}</p>
                         )}
                         <button type="submit" disabled={authLoading}
-                            className="w-full py-3 bg-slate-900 text-white text-[11px] font-black uppercase tracking-widest hover:bg-slate-700 transition-colors disabled:opacity-50">
-                            {authLoading ? '처리 중...' : showAuthModal === 'login' ? 'Log In' : 'Sign Up'}
+                            className="w-full py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-wide hover:bg-slate-700 transition-colors disabled:opacity-50">
+                            {authLoading ? '처리 중...' : showAuthModal === 'login' ? '로그인' : '회원가입'}
                         </button>
                         <button type="button" onClick={() => {
                             setShowAuthModal(showAuthModal === 'login' ? 'signup' : 'login');
                             setAuthError('');
-                        }} className="w-full text-center text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors py-1">
+                        }} className="w-full text-center text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors py-1">
                             {showAuthModal === 'login' ? '계정이 없으신가요? → 회원가입' : '이미 계정이 있으신가요? → 로그인'}
                         </button>
                     </form>
                     <div className="mt-4 pt-4 border-t border-slate-200">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 text-center mb-3">소셜 로그인</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-slate-400 text-center mb-3">소셜 로그인</p>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => handleSocialLogin('google')}
@@ -222,7 +222,7 @@ export default function Header() {
                                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                                 </svg>
-                                <span className="text-[11px] font-bold text-slate-700">
+                                <span className="text-xs font-bold text-slate-700">
                                     {socialLoading === 'google' ? '연결 중...' : 'Google'}
                                 </span>
                             </button>
@@ -235,7 +235,7 @@ export default function Header() {
                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="#000000">
                                     <path d="M12 3c-5.52 0-10 3.13-10 7 0 2.48 1.64 4.66 4.12 5.91-.18.67-.67 2.42-.77 2.8-.12.47.17.46.36.34.15-.1 2.37-1.61 3.32-2.27.96.14 1.95.22 2.97.22 5.52 0 10-3.13 10-7s-4.48-7-10-7z" />
                                 </svg>
-                                <span className="text-[11px] font-bold text-slate-900">
+                                <span className="text-xs font-bold text-slate-900">
                                     {socialLoading === 'kakao' ? '연결 중...' : 'Kakao'}
                                 </span>
                             </button>
@@ -276,7 +276,7 @@ export default function Header() {
                                 type="text"
                                 value={mobileSearchQuery}
                                 onChange={(e) => setMobileSearchQuery(e.target.value)}
-                                placeholder="Search ILSANGGAM"
+                                placeholder="검색어를 입력하세요"
                                 className="flex-grow bg-transparent border-none text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:ring-0 outline-none"
                             />
                             <button type="submit" className="text-slate-900 hover:text-slate-500 ml-2">
@@ -300,7 +300,7 @@ export default function Header() {
                                             <span className="text-[13px] font-black tracking-widest text-slate-900 uppercase group-hover:text-blue-600">
                                                 {cat.name}
                                             </span>
-                                            <span className="text-[10px] font-medium text-slate-400 mt-0.5">
+                                            <span className="text-xs font-medium text-slate-400 mt-0.5">
                                                 {cat.korean}
                                             </span>
                                         </div>
@@ -325,7 +325,7 @@ export default function Header() {
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    className="text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-wider"
+                                    className="text-xs font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-wider"
                                 >
                                     {link.label}
                                 </Link>
@@ -350,7 +350,7 @@ export default function Header() {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search stories, tips, and hacks..."
+                                placeholder="글 검색..."
                                 className="flex-grow bg-transparent border-none text-xl sm:text-2xl font-bold text-slate-900 placeholder:text-slate-300 focus:ring-0 py-4 outline-none"
                             />
                             <button type="button" onClick={() => setIsSearchOpen(false)} className="ml-4 p-2 text-slate-400 hover:text-slate-900 transition-colors">
@@ -383,7 +383,7 @@ export default function Header() {
                     <div className="flex items-center gap-3 sm:gap-6 text-slate-900 ml-4">
                         {/* Auth Buttons / User Info */}
                         {user ? (
-                            <div className="flex items-center gap-2 text-[11px] font-bold">
+                            <div className="flex items-center gap-2 text-xs font-bold">
                                 {user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
                                     <Link href="/admin" className="text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest">
                                         Admin
@@ -392,17 +392,17 @@ export default function Header() {
                                 <span className="hidden sm:inline text-slate-700">
                                     {getUserDisplayName(user)}
                                 </span>
-                                <button onClick={handleLogout} className="text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest">
+                                <button onClick={handleLogout} className="px-2 py-1 text-slate-400 hover:text-red-500 transition-colors uppercase tracking-wide">
                                     로그아웃
                                 </button>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-2 text-[11px] font-bold">
-                                <button onClick={() => setShowAuthModal('login')} className="text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-widest">
+                            <div className="flex items-center gap-2 text-xs font-bold">
+                                <button onClick={() => setShowAuthModal('login')} className="px-2 py-1 text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-wide">
                                     로그인
                                 </button>
                                 <span className="text-slate-300">|</span>
-                                <button onClick={() => setShowAuthModal('signup')} className="text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest">
+                                <button onClick={() => setShowAuthModal('signup')} className="px-2 py-1 text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-wide">
                                     회원가입
                                 </button>
                             </div>
@@ -440,7 +440,7 @@ export default function Header() {
 
                         {/* Search (desktop) */}
                         <button
-                            className="p-1 hover:text-blue-600 transition-colors hidden sm:block"
+                            className="p-2 hover:text-blue-600 transition-colors hidden sm:block"
                             aria-label="Search"
                             onClick={() => setIsSearchOpen(true)}
                         >
@@ -451,7 +451,7 @@ export default function Header() {
 
                         {/* Search (mobile - opens menu) */}
                         <button
-                            className="p-1 hover:text-blue-600 transition-colors sm:hidden"
+                            className="p-2 hover:text-blue-600 transition-colors sm:hidden"
                             aria-label="Search"
                             onClick={() => setIsMobileMenuOpen(true)}
                         >
@@ -462,7 +462,7 @@ export default function Header() {
 
                         {/* Hamburger */}
                         <button
-                            className="p-1 hover:text-blue-600 transition-colors"
+                            className="p-2 hover:text-blue-600 transition-colors"
                             aria-label="Menu"
                             onClick={() => setIsMobileMenuOpen(true)}
                         >
@@ -484,7 +484,7 @@ export default function Header() {
                                         className="text-[13px] sm:text-[15px] font-black tracking-widest text-slate-500 hover:text-blue-600 hover:bg-slate-50 transition-colors cursor-pointer flex flex-col items-center text-center px-4 sm:px-6 py-3 leading-tight whitespace-nowrap"
                                     >
                                         <span>{cat.name}</span>
-                                        <span className="text-[10px] sm:text-[12px] font-medium text-slate-400 mt-0.5">
+                                        <span className="text-xs sm:text-[12px] font-medium text-slate-400 mt-0.5">
                                             {cat.korean}
                                         </span>
                                     </Link>

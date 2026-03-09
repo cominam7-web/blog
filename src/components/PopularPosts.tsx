@@ -50,8 +50,8 @@ export default async function PopularPosts() {
 
   return (
     <section className="mb-16">
-      <h2 className="text-xs font-black tracking-widest text-slate-400 uppercase mb-6">
-        Popular Posts
+      <h2 className="text-xs font-bold tracking-wide text-slate-400 mb-6">
+        인기 글
       </h2>
       <ol className="divide-y divide-slate-100">
         {entries.map((entry) => (
@@ -67,8 +67,8 @@ export default async function PopularPosts() {
                 {entry.title}
               </Link>
             </div>
-            <span className="text-[11px] font-bold text-slate-400 whitespace-nowrap">
-              {entry.views.toLocaleString()} views
+            <span className="text-xs font-bold text-slate-400 whitespace-nowrap">
+              {entry.views.toLocaleString()} 조회
             </span>
           </li>
         ))}

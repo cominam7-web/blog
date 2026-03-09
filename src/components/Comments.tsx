@@ -232,34 +232,34 @@ export default function Comments({ slug }: { slug: string }) {
     };
 
     return (
-        <section id="comments" className="mt-20">
+        <section id="comments" className="mt-12">
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b-2 border-slate-900 pb-2 mb-8 gap-2">
                 <div className="flex items-baseline gap-2 sm:gap-4">
                     <h3 className="text-xl sm:text-2xl font-black tracking-tighter text-slate-900 uppercase">
-                        Conversation
+                        댓글
                     </h3>
-                    <span className="text-slate-400 text-[11px] font-bold uppercase tracking-widest pl-2 border-l border-slate-200">
-                        {commentCount} Comments
+                    <span className="text-slate-400 text-xs font-bold uppercase tracking-widest pl-2 border-l border-slate-200">
+                        {commentCount} 개
                     </span>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4">
                     {user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
-                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-green-600">
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-green-600">
                             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                             {views.toLocaleString()} Views
                         </div>
                     )}
                     {user && (
                         <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-bold text-slate-500">
+                            <span className="text-xs font-bold text-slate-500">
                                 {getUserDisplayName(user)}
                             </span>
                             <button
                                 onClick={handleLogout}
-                                className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors"
+                                className="text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors"
                             >
-                                Log Out
+                                로그아웃
                             </button>
                         </div>
                     )}
@@ -272,10 +272,10 @@ export default function Comments({ slug }: { slug: string }) {
                     {/* 로그인 사용자 표시 */}
                     {user && (
                         <div className="flex items-center gap-3 mb-3">
-                            <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center text-white text-[11px] font-black flex-shrink-0">
+                            <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center text-white text-xs font-black flex-shrink-0">
                                 {getUserDisplayName(user).charAt(0).toUpperCase()}
                             </div>
-                            <span className="text-[11px] font-black text-slate-700 uppercase tracking-wider">
+                            <span className="text-xs font-black text-slate-700 uppercase tracking-wider">
                                 {getUserDisplayName(user)}
                             </span>
                         </div>
@@ -326,15 +326,15 @@ export default function Comments({ slug }: { slug: string }) {
                         maxLength={1000}
                     />
                     <div className="flex justify-between items-center mt-2">
-                        <span className="text-[10px] text-slate-400 font-medium">
+                        <span className="text-xs text-slate-400 font-medium">
                             {newComment.length}/1000
                         </span>
                         <button
                             type="submit"
                             disabled={!newComment.trim() || posting}
-                            className="px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="px-6 py-3 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                            {posting ? 'Posting...' : 'Post'}
+                            {posting ? '등록 중...' : '등록'}
                         </button>
                     </div>
 
@@ -348,8 +348,8 @@ export default function Comments({ slug }: { slug: string }) {
                 {/* 소셜 로그인 */}
                 {!user && (
                     <div className="mt-4 pt-4 border-t border-slate-200">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
-                            Or sign in with
+                        <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">
+                            소셜 로그인
                         </p>
                         <div className="flex gap-2 flex-wrap">
                             <button
@@ -410,14 +410,14 @@ export default function Comments({ slug }: { slug: string }) {
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setDeleteTarget(null)}
-                                className="flex-1 py-2.5 border border-slate-300 text-[11px] font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors"
+                                className="flex-1 py-2.5 border border-slate-300 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors"
                             >
                                 취소
                             </button>
                             <button
                                 onClick={handleGuestDelete}
                                 disabled={!deletePassword || deleting}
-                                className="flex-1 py-2.5 bg-red-500 text-white text-[11px] font-black uppercase tracking-widest hover:bg-red-600 transition-colors disabled:opacity-50"
+                                className="flex-1 py-2.5 bg-red-500 text-white text-xs font-black uppercase tracking-widest hover:bg-red-600 transition-colors disabled:opacity-50"
                             >
                                 {deleting ? '삭제 중...' : '삭제'}
                             </button>
@@ -428,15 +428,15 @@ export default function Comments({ slug }: { slug: string }) {
 
             {/* Sort */}
             <div className="flex justify-start mb-6">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    Sort by
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                    정렬
                     <select
                         value={sortOrder}
                         onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
                         className="bg-transparent border-none p-0 text-slate-900 font-black uppercase focus:ring-0 focus:outline-none cursor-pointer"
                     >
-                        <option value="newest">Newest</option>
-                        <option value="oldest">Oldest</option>
+                        <option value="newest">최신순</option>
+                        <option value="oldest">오래된순</option>
                     </select>
                 </div>
             </div>
@@ -445,7 +445,7 @@ export default function Comments({ slug }: { slug: string }) {
             {comments.length === 0 ? (
                 <div className="text-center py-20 bg-slate-50 border border-dashed border-slate-200">
                     <p className="text-slate-400 font-medium italic">
-                        No comments yet. Start the conversation!
+                        아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
                     </p>
                 </div>
             ) : (
@@ -457,21 +457,21 @@ export default function Comments({ slug }: { slug: string }) {
                         >
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-[12px] font-black flex-shrink-0 ${comment.is_guest ? 'bg-slate-400' : 'bg-slate-900'}`}>
+                                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-black flex-shrink-0 ${comment.is_guest ? 'bg-slate-400' : 'bg-slate-900'}`}>
                                         {comment.user_name.charAt(0).toUpperCase()}
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <p className="text-[12px] font-black text-slate-900">
+                                            <p className="text-sm font-black text-slate-900">
                                                 {comment.user_name}
                                             </p>
                                             {comment.is_guest && (
-                                                <span className="text-[9px] font-bold text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded uppercase">
-                                                    Guest
+                                                <span className="text-xs font-bold text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded uppercase">
+                                                    게스트
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-[10px] text-slate-400 font-medium">
+                                        <p className="text-xs text-slate-400 font-medium">
                                             {formatDate(comment.created_at)}
                                         </p>
                                     </div>
@@ -479,7 +479,7 @@ export default function Comments({ slug }: { slug: string }) {
                                 {canDelete(comment) && (
                                     <button
                                         onClick={() => handleDeleteComment(comment.id, comment.is_guest)}
-                                        className="text-[10px] font-bold text-slate-300 hover:text-red-500 transition-colors uppercase tracking-widest flex-shrink-0"
+                                        className="text-xs font-bold text-slate-300 hover:text-red-500 transition-colors uppercase tracking-widest flex-shrink-0 px-2 py-1"
                                     >
                                         삭제
                                     </button>
