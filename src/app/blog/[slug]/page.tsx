@@ -416,7 +416,13 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </div>
                     </div>
 
-                    {/* Related Posts */}
+                    {/* Newsletter CTA - 글 직후 */}
+                    <NewsletterForm className="mt-8" />
+
+                    {/* Comment Section - 구독 바로 아래 */}
+                    <Comments slug={slug} />
+
+                    {/* Related Posts - 댓글 아래 */}
                     {relatedPosts.length > 0 && (
                         <div className="mt-12 pt-8 border-t border-dashed border-slate-200">
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Related Posts</p>
@@ -436,14 +442,8 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </div>
                     )}
 
-                    {/* Newsletter CTA */}
-                    <NewsletterForm className="mt-10" />
-
-                    {/* Ad: 댓글 위 */}
+                    {/* Ad: 하단 */}
                     <AdBanner slot="9346051403" format="auto" className="mt-8" />
-
-                    {/* Comment Section */}
-                    <Comments slug={slug} />
                 </div>
             </div>
         </article>
