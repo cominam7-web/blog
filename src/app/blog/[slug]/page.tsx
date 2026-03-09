@@ -35,6 +35,8 @@ import ShareButton from '@/components/ShareButton';
 import AdBanner from '@/components/AdBanner';
 import NewsletterForm from '@/components/NewsletterForm';
 import CoupangBanner from '@/components/CoupangBanner';
+import LikeButton from '@/components/LikeButton';
+import FaqSchema from '@/components/FaqSchema';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import TableOfContents from '@/components/TableOfContents';
 import { PILLAR_PAGES } from '@/lib/pillar-pages';
@@ -202,6 +204,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
             />
+            <FaqSchema content={postData.content} />
             {/* 조회수 자동 기록 (클라이언트, 세션당 1회) */}
             <ViewTracker slug={slug} />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -396,6 +399,11 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                             </Link>
                         );
                     })()}
+
+                    {/* Like Button */}
+                    <div className="mt-10 flex justify-center">
+                        <LikeButton slug={slug} />
+                    </div>
 
                     {/* Share & Footer Info */}
                     <div className="mt-8 pt-8 border-t-2 border-slate-900">

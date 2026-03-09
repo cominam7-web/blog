@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { rateLimit, getRateLimitHeaders } from '@/lib/rate-limit';
+
+function getSupabaseAdmin() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    return createClient(url, key);
+}
 
 export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for') || 'unknown';
@@ -20,7 +26,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: '올바른 이메일 주소를 입력해주세요.' }, { status: 400 });
         }
 
-        const supabase = getSupabase();
+        const supabase = getSupabaseAdmin();
 
         // Check if already subscribed
         const { data: existing } = await supabase

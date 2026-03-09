@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         const supabase = createClient(url, key);
         const [viewsRes, commentsRes] = await Promise.all([
             supabase.from('posts').select('slug, views'),
-            supabase.from('comments').select('slug'),
+            supabase.rpc('get_comment_counts'),
         ]);
 
         const stats: Record<string, { views: number; comments: number }> = {};
@@ -30,10 +30,20 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        if (commentsRes.data) {
+        // RPC가 없으면 fallback으로 전체 댓글 조회
+        if (commentsRes.data && Array.isArray(commentsRes.data)) {
             for (const row of commentsRes.data) {
                 if (!stats[row.slug]) stats[row.slug] = { views: 0, comments: 0 };
-                stats[row.slug].comments++;
+                stats[row.slug].comments = row.count ?? 0;
+            }
+        } else {
+            // Fallback: RPC 미존재 시 기존 방식
+            const fallback = await supabase.from('comments').select('slug');
+            if (fallback.data) {
+                for (const row of fallback.data) {
+                    if (!stats[row.slug]) stats[row.slug] = { views: 0, comments: 0 };
+                    stats[row.slug].comments++;
+                }
             }
         }
 
