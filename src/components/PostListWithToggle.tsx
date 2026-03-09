@@ -322,6 +322,19 @@ export default function PostListWithToggle({
                             )}
                         </nav>
                     )}
+
+                    {/* SEO: Hidden full post links for crawlers */}
+                    {filteredPosts.length > POSTS_PER_PAGE && (
+                        <nav aria-label="All posts" className="sr-only">
+                            <ul>
+                                {filteredPosts.map((post) => (
+                                    <li key={`seo-${post.slug}`}>
+                                        <a href={`/blog/${post.slug}`}>{post.title}</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </nav>
+                    )}
                 </>
             ) : (
                 <div className="py-20 text-center">
