@@ -45,10 +45,10 @@ export default function Footer() {
                     <Link href="/privacy" className="hover:text-blue-600 transition-colors py-1">
                         개인정보
                     </Link>
-                    <a href="/feed.xml" className="hover:text-blue-600 transition-colors py-1" title="RSS Feed">
+                    <a href="/feed.xml" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors py-1" title="RSS Feed">
                         RSS
                     </a>
-                    <a href="/sitemap.xml" className="hover:text-blue-600 transition-colors py-1" title="Sitemap">
+                    <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors py-1" title="Sitemap">
                         Sitemap
                     </a>
                 </nav>
