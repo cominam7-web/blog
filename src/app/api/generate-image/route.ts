@@ -32,9 +32,18 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Missing prompt' }, { status: 400 });
     }
 
-    // Rate limiting: IP당 분당 30회 (이미지 캐시 히트는 빠르므로 넉넉하게)
+    // 동일 사이트 요청만 허용 (외부 API 남용 방지)
+    const referer = request.headers.get('referer') || '';
+    const origin = request.headers.get('origin') || '';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
+    const isInternal = referer.startsWith(siteUrl) || origin.startsWith(siteUrl) || !referer;
+    if (!isInternal) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // Rate limiting: IP당 분당 10회 (외부 남용 방지 강화)
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-    const { success: rlOk } = rateLimit(`genimg:${ip}`, { limit: 30, windowMs: 60_000 });
+    const { success: rlOk } = rateLimit(`genimg:${ip}`, { limit: 10, windowMs: 60_000 });
     if (!rlOk) {
         return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
     }

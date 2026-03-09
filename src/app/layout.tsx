@@ -55,13 +55,13 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     siteName: "Ilsanggam Life Studio",
     url: siteUrl,
-    images: [{ url: '/og-default.svg', width: 1200, height: 630, alt: 'Ilsanggam Life Studio' }],
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Ilsanggam Life Studio' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: "Ilsanggam Life Studio | 최고의 생활 정보 저장소",
     description: "건강, 생활 꿀팁, 테크, 엔터테인먼트까지 일상에 감각을 더하는 실용 정보 블로그",
-    images: ['/og-default.svg'],
+    images: ['/og-default.png'],
   },
   other: {
     'theme-color': '#0f172a',
@@ -94,10 +94,11 @@ export default function RootLayout({
         {adsenseId && (
           <>
             <meta name="google-adsense-account" content={adsenseId} />
-            <script
+            <Script
               async
               src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
               crossOrigin="anonymous"
+              strategy="afterInteractive"
             />
           </>
         )}

@@ -21,31 +21,32 @@ export async function POST(request: NextRequest) {
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
 
-        // 현재 views 조회
-        const { data, error: fetchError } = await supabase
-            .from('posts')
-            .select('views')
-            .eq('slug', slug)
-            .single();
-
-        if (fetchError || !data) {
-            // posts 테이블에 slug 없으면 (MD만 있는 경우) 무시
-            return NextResponse.json({ success: true, views: 0 });
-        }
-
-        // views + 1 업데이트
-        const newViews = (data.views ?? 0) + 1;
-        const { error: updateError } = await supabase
-            .from('posts')
-            .update({ views: newViews })
-            .eq('slug', slug);
+        // 원자적 views + 1 업데이트 (race condition 방지)
+        const { data, error: updateError } = await supabase
+            .rpc('increment_views', { post_slug: slug });
 
         if (updateError) {
-            console.error('View update error:', updateError);
-            return NextResponse.json({ error: updateError.message }, { status: 500 });
+            // RPC 없으면 fallback (기존 방식)
+            const { data: post } = await supabase
+                .from('posts')
+                .select('views')
+                .eq('slug', slug)
+                .single();
+
+            if (!post) {
+                return NextResponse.json({ success: true, views: 0 });
+            }
+
+            const newViews = (post.views ?? 0) + 1;
+            await supabase
+                .from('posts')
+                .update({ views: newViews })
+                .eq('slug', slug);
+
+            return NextResponse.json({ success: true, views: newViews });
         }
 
-        return NextResponse.json({ success: true, views: newViews });
+        return NextResponse.json({ success: true, views: data ?? 0 });
     } catch (e) {
         console.error('View API error:', e);
         return NextResponse.json({ error: 'Internal error' }, { status: 500 });

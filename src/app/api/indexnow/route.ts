@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     // 간단한 인증 (admin API key 확인)
     const authHeader = request.headers.get('authorization');
     const adminKey = process.env.ADMIN_API_KEY || '';
-    if (adminKey && authHeader !== `Bearer ${adminKey}`) {
+    if (!adminKey || authHeader !== `Bearer ${adminKey}`) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
