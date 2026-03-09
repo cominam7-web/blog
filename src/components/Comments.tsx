@@ -35,6 +35,9 @@ export default function Comments({ slug }: { slug: string }) {
     // 소셜 로그인 로딩
     const [socialLoading, setSocialLoading] = useState<string | null>(null);
 
+    // 정렬
+    const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+
     // 허니팟 (스팸 방지)
     const [hp, setHp] = useState('');
 
@@ -427,9 +430,13 @@ export default function Comments({ slug }: { slug: string }) {
             <div className="flex justify-start mb-6">
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Sort by
-                    <select className="bg-transparent border-none p-0 text-slate-900 font-black uppercase focus:ring-0 focus:outline-none cursor-pointer">
-                        <option>Newest</option>
-                        <option>Oldest</option>
+                    <select
+                        value={sortOrder}
+                        onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+                        className="bg-transparent border-none p-0 text-slate-900 font-black uppercase focus:ring-0 focus:outline-none cursor-pointer"
+                    >
+                        <option value="newest">Newest</option>
+                        <option value="oldest">Oldest</option>
                     </select>
                 </div>
             </div>
@@ -443,7 +450,7 @@ export default function Comments({ slug }: { slug: string }) {
                 </div>
             ) : (
                 <div className="space-y-4 mb-12">
-                    {comments.map((comment) => (
+                    {(sortOrder === 'oldest' ? [...comments].reverse() : comments).map((comment) => (
                         <div
                             key={comment.id}
                             className="border border-slate-100 p-6 bg-white hover:border-slate-200 transition-colors"

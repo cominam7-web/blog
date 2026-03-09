@@ -1,5 +1,5 @@
 import { getPostData, getSortedPostsData } from '@/lib/posts';
-import { resolveNanobanana, NANOBANANA_REGEX } from '@/lib/nanobanana';
+import { resolveNanobanana, resolveNanobananaOgUrl, NANOBANANA_REGEX } from '@/lib/nanobanana';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -58,7 +58,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         };
     }
 
-    const ogImage = post.image ? resolveNanobanana(post.image) : '/og-default.svg';
+    // OG 이미지: Supabase Storage 정적 URL 사용 (크롤러가 Gemini API 호출하지 않도록)
+    const ogImage = post.image
+        ? (resolveNanobananaOgUrl(post.image) || '/og-default.png')
+        : '/og-default.png';
 
     return {
         title: post.title,
@@ -87,9 +90,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function Post({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const rawPostData = getPostData(slug);
 
-    // getPostData가 null을 반환하면 Next.js 404 페이지로 이동 (never를 반환하므로 TS 타입 추론 정상)
+    // 전체 포스트를 1회만 로드하여 현재 포스트 + 관련 포스트 모두 처리
+    const allPosts = getSortedPostsData();
+    const rawPostData = allPosts.find(p => p.slug === slug) ?? null;
+
     if (!rawPostData) {
         return notFound();
     }
@@ -158,7 +163,6 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
     };
 
     // Related posts: scored by category match (+2) and shared tags (+1 each)
-    const allPosts = getSortedPostsData();
     const currentTags = new Set(postData.tags);
     const relatedPosts = allPosts
         .filter(p => p.slug !== slug)
@@ -342,7 +346,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     </div>
 
                     {/* Ad: 본문 하단 */}
-                    <AdBanner slot="post-bottom" format="horizontal" className="mt-8" />
+                    <AdBanner slot="9346051403" format="auto" className="mt-8" />
 
                     {/* Tags Footer */}
                     {postData.tags.length > 0 && (
@@ -362,8 +366,16 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </div>
                     )}
 
-                    {/* Coupang Partners */}
-                    <CoupangBanner className="mt-8" />
+                    {/* Coupang Partners - 카테고리별 키워드 자동 매핑 */}
+                    <CoupangBanner
+                        className="mt-8"
+                        keyword={
+                            postData.category === 'Health' ? '건강식품 베스트' :
+                            postData.category === 'Tech' ? '디지털 가전 베스트' :
+                            postData.category === 'Entertainment' ? '도서 영화 베스트' :
+                            '생활용품 베스트'
+                        }
+                    />
 
                     {/* Pillar Page Guide Banner */}
                     {(() => {
@@ -420,7 +432,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     <NewsletterForm className="mt-10" />
 
                     {/* Ad: 댓글 위 */}
-                    <AdBanner slot="before-comments" format="auto" className="mt-8" />
+                    <AdBanner slot="9346051403" format="auto" className="mt-8" />
 
                     {/* Comment Section */}
                     <Comments slug={slug} />

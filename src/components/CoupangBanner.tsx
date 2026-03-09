@@ -11,30 +11,32 @@ export default function CoupangBanner({ campaignId, keyword, className = '' }: C
 
     if (!partnersId) return null;
 
-    const baseUrl = campaignId
-        ? `https://link.coupang.com/a/${campaignId}`
-        : `https://www.coupang.com`;
-
-    const url = new URL(baseUrl);
-    url.searchParams.set('sid', partnersId);
-    if (keyword) {
-        url.searchParams.set('keyword', keyword);
+    let targetUrl: string;
+    if (campaignId) {
+        const url = new URL(`https://link.coupang.com/a/${campaignId}`);
+        url.searchParams.set('sid', partnersId);
+        if (keyword) url.searchParams.set('keyword', keyword);
+        targetUrl = url.toString();
+    } else {
+        // 키워드가 있으면 검색 결과로, 없으면 베스트 카테고리로 이동
+        const searchKeyword = keyword || '생활용품 베스트';
+        targetUrl = `https://www.coupang.com/np/search?component=&q=${encodeURIComponent(searchKeyword)}&channel=user`;
     }
 
     return (
-        <div className={`my-6 rounded-lg border border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 p-5 dark:border-slate-700 dark:from-slate-800 dark:to-slate-800 ${className}`}>
+        <div className={`my-6 rounded-lg border border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 p-5 ${className}`}>
             <a
-                href={url.toString()}
+                href={targetUrl}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
                 className="flex flex-col items-center gap-3 text-center no-underline"
             >
                 <span className="text-2xl">🛒</span>
-                <span className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+                <span className="text-lg font-semibold text-slate-800">
                     추천 상품 보러가기
                 </span>
                 {keyword && (
-                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                    <span className="text-sm text-slate-500">
                         &ldquo;{keyword}&rdquo; 관련 상품
                     </span>
                 )}
@@ -42,7 +44,7 @@ export default function CoupangBanner({ campaignId, keyword, className = '' }: C
                     쿠팡에서 확인하기
                 </span>
             </a>
-            <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
+            <p className="mt-3 text-center text-xs text-slate-400">
                 이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
             </p>
         </div>
