@@ -373,12 +373,22 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                     {/* Coupang Partners - 카테고리별 키워드 자동 매핑 */}
                     <CoupangBanner
                         className="mt-8"
-                        keyword={
-                            postData.category === 'Health' ? '건강식품 베스트' :
-                            postData.category === 'Tech' ? '디지털 가전 베스트' :
-                            postData.category === 'Entertainment' ? '도서 영화 베스트' :
-                            '생활용품 베스트'
-                        }
+                        keyword={(() => {
+                            // 태그에서 상품 검색에 적합한 키워드 추출
+                            const tags = postData.tags || [];
+                            // 너무 일반적인 태그는 제외
+                            const excludePatterns = /블로그|추천|방법|가이드|정리|비교|후기|리뷰|팁|무료|2026|2025/;
+                            const productTag = tags.find((t: string) => !excludePatterns.test(t) && t.length >= 2);
+                            if (productTag) return productTag;
+                            // 태그에서 못 찾으면 카테고리별 기본값
+                            const categoryKeywords: Record<string, string> = {
+                                Health: '건강식품 베스트',
+                                Tech: '디지털 가전 베스트',
+                                Entertainment: '도서 영화 베스트',
+                                Hacks: '생활용품 베스트',
+                            };
+                            return categoryKeywords[postData.category] || '생활용품 베스트';
+                        })()}
                     />
 
                     {/* Pillar Page Guide Banner */}

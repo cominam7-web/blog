@@ -33,13 +33,10 @@ export default function CoupangBanner({ campaignId, keyword, className = '' }: C
             >
                 <span className="text-2xl">🛒</span>
                 <span className="text-lg font-semibold text-slate-800">
-                    추천 상품 보러가기
+                    {keyword && !/베스트$/.test(keyword)
+                        ? `"${keyword}" 관련 추천 상품`
+                        : '추천 상품 보러가기'}
                 </span>
-                {keyword && (
-                    <span className="text-sm text-slate-500">
-                        &ldquo;{keyword}&rdquo; 관련 상품
-                    </span>
-                )}
                 <span className="inline-block rounded-full bg-blue-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700">
                     쿠팡에서 확인하기
                 </span>
