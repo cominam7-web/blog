@@ -376,27 +376,35 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         keyword={(() => {
                             // 태그에서 쿠팡 상품과 매칭되는 키워드 찾기
                             const tags = (postData.tags || []).map((t: string) => t.toLowerCase());
-                            const productKeywords: Record<string, string> = {
+                            // 태그 전체가 정확히 일치하는 것 우선 (구체적 매칭)
+                            const exactKeywords: Record<string, string> = {
                                 // Health
-                                '혈압': '혈압계', '혈당': '혈당측정기', '체중': '체중계', '다이어트': '다이어트 식품',
-                                '영양제': '영양제', '비타민': '비타민', '운동': '홈트레이닝 기구', '수면': '수면 베개',
+                                '혈압': '혈압계', '혈당': '혈당측정기', '체중 관리': '체중계', '다이어트': '다이어트 식품',
+                                '영양제': '영양제', '비타민': '비타민', '홈트레이닝': '홈트레이닝 기구', '수면': '수면 베개',
                                 '건강검진': '건강관리용품', '마사지': '마사지건', '프로바이오틱스': '프로바이오틱스',
-                                '눈 건강': '루테인', '관절': '관절 영양제', '피로': '피로회복제',
+                                '눈 건강': '루테인', '관절 건강': '관절 영양제', '피로 회복': '피로회복제',
+                                '오메가3': '오메가3', '칼슘': '칼슘 영양제', '단백질': '단백질 보충제',
                                 // Tech
                                 '노트북': '노트북', '키보드': '무선 키보드', '마우스': '무선 마우스',
                                 '모니터': '모니터', '이어폰': '무선 이어폰', '충전기': '고속 충전기',
-                                '스마트폰': '스마트폰 케이스', 'ai': 'AI 스피커', '태블릿': '태블릿',
-                                'vpn': 'USB 보안', '와이파이': '와이파이 공유기', '보안': '보안 카메라',
+                                '스마트폰': '스마트폰 케이스', '태블릿': '태블릿', '와이파이 공유기': '와이파이 공유기',
+                                'usb': 'USB 허브', '외장하드': '외장하드', 'ssd': 'SSD',
                                 // Entertainment
-                                '넷플릭스': '스트리밍 기기', '영화': 'OTT 굿즈', '드라마': '드라마 OST',
-                                '게임': '게이밍 기어', '음악': '블루투스 스피커', '독서': '베스트셀러',
+                                '넷플릭스': '스트리밍 기기', '게임': '게이밍 기어', '독서': '베스트셀러',
+                                '음악 감상': '블루투스 스피커', '캠핑': '캠핑용품',
                                 // Hacks / Life
-                                '절약': '생활용품 세트', '청소': '청소용품', '수납': '수납 정리함',
+                                '청소': '청소용품', '수납': '수납 정리함', '정리 정돈': '수납 정리함',
                                 '요리': '주방용품', '인테리어': '인테리어 소품', '여행': '여행용품',
+                                '공부': '스터디 플래너', '독서등': '독서등', '텀블러': '텀블러',
                             };
+                            // 1차: 태그와 키워드가 정확히 일치
                             for (const tag of tags) {
-                                for (const [keyword, product] of Object.entries(productKeywords)) {
-                                    if (tag.includes(keyword)) return product;
+                                if (exactKeywords[tag]) return exactKeywords[tag];
+                            }
+                            // 2차: 태그에 키워드가 포함 (3글자 이상 키워드만)
+                            for (const tag of tags) {
+                                for (const [keyword, product] of Object.entries(exactKeywords)) {
+                                    if (keyword.length >= 3 && tag.includes(keyword)) return product;
                                 }
                             }
                             const categoryDefaults: Record<string, string> = {
