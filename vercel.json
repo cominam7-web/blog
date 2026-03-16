@@ -5,6 +5,5 @@
       "main": true,
       "master": true
     }
-  },
-  "autoAssignCustomDomains": true
+  }
 }
