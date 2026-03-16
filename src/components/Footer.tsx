@@ -45,6 +45,9 @@ export default function Footer() {
                     <Link href="/privacy" className="hover:text-blue-600 transition-colors py-1">
                         개인정보
                     </Link>
+                    <Link href="/terms" className="hover:text-blue-600 transition-colors py-1">
+                        이용약관
+                    </Link>
                 </nav>
                 </div>
             </div>

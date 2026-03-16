@@ -4,7 +4,13 @@ interface CoupangBannerProps {
     className?: string;
 }
 
+// AdSense 승인 전까지 쿠팡 배너 비활성화
+// 승인 후 NEXT_PUBLIC_ENABLE_COUPANG=true 환경변수를 설정하면 다시 활성화됩니다.
+const ENABLE_COUPANG = process.env.NEXT_PUBLIC_ENABLE_COUPANG === 'true';
+
 export default function CoupangBanner({ className = '' }: CoupangBannerProps) {
+    if (!ENABLE_COUPANG) return null;
+
     return (
         <div className={`my-6 ${className}`}>
             <iframe
