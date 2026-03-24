@@ -138,9 +138,9 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
         datePublished: postData.date,
         dateModified: postData.date,
         author: {
-            '@type': 'Person',
-            name: 'Ilsanggam Life Studio',
-            url: siteUrl,
+            '@type': 'Organization',
+            name: '일상감 라이프 스튜디오 편집팀',
+            url: `${siteUrl}/about`,
         },
         publisher: {
             '@type': 'Organization',
@@ -166,18 +166,20 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
     };
 
     // Related posts: scored by category match (+2) and shared tags (+1 each)
+    // 관련 글이 부족하면 최신 글로 채워 내부 링크 밀도 유지 (SEO 크롤링 강화)
     const currentTags = new Set(postData.tags);
-    const relatedPosts = allPosts
+    const scoredPosts = allPosts
         .filter(p => p.slug !== slug)
         .map(p => {
             const categoryScore = p.category === postData.category ? 2 : 0;
             const tagScore = p.tags.filter(t => currentTags.has(t)).length;
             return { ...p, _score: categoryScore + tagScore };
         })
-        .filter(p => p._score > 0)
-        .sort((a, b) => b._score - a._score || new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 3)
-        .map(p => ({ ...p, image: resolveNanobanana(p.image || '') }));
+        .sort((a, b) => b._score - a._score || new Date(b.date).getTime() - new Date(a.date).getTime());
+    const relatedPosts = (scoredPosts.filter(p => p._score > 0).length >= 3
+        ? scoredPosts.filter(p => p._score > 0)
+        : scoredPosts
+    ).slice(0, 3).map(p => ({ ...p, image: resolveNanobanana(p.image || '') }));
 
     // Helper to generate heading ID from text content
     const generateHeadingId = (children: React.ReactNode): string => {
@@ -230,10 +232,10 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
 
                     {/* Meta Bar */}
                     <div className="flex items-center justify-center gap-4 sm:gap-6 text-xs font-bold text-slate-500 flex-wrap">
-                        <span className="flex items-center gap-2">
-                            <span className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs border border-slate-200">👤</span>
-                            <span className="text-slate-900">Ilsanggam Life</span>
-                        </span>
+                        <Link href="/about" className="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                            <span className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-[10px] text-white font-black">일</span>
+                            <span className="text-slate-900">일상감 편집팀</span>
+                        </Link>
                         <span className="text-slate-300">|</span>
                         <span className="flex items-center gap-2 uppercase tracking-wider">
                             📅 {postData.date}
@@ -251,7 +253,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                             {postData.tags.map((tag) => (
                                 <Link
                                     key={tag}
-                                    href={`/search?q=${encodeURIComponent(tag)}`}
+                                    href={`/tag/${encodeURIComponent(tag)}`}
                                     className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-full hover:bg-blue-50 hover:text-blue-600 transition-colors"
                                 >
                                     #{tag}
@@ -349,6 +351,27 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </ReactMarkdown>
                     </div>
 
+                    {/* 저자 프로필 (E-E-A-T 강화) */}
+                    <div className="mt-12 p-6 bg-slate-50 border border-slate-200 rounded-sm">
+                        <div className="flex items-start gap-4">
+                            <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl font-black shrink-0">
+                                일
+                            </div>
+                            <div>
+                                <p className="text-sm font-black text-slate-900 mb-1">일상감 라이프 스튜디오 편집팀</p>
+                                <p className="text-xs text-slate-500 leading-relaxed">
+                                    일상감 라이프 스튜디오는 건강, 생활정보, 테크, 엔터테인먼트 분야의 실용적인 정보를 전문적으로 다루는 콘텐츠 팀입니다.
+                                    공식 자료와 전문가 의견을 바탕으로 검증된 정보만을 제공하며, 독자 여러분의 일상에 실질적인 도움이 되는 콘텐츠를 만들기 위해 노력합니다.
+                                </p>
+                                <div className="flex items-center gap-3 mt-3">
+                                    <Link href="/about" className="text-xs font-bold text-blue-600 hover:underline">더 알아보기</Link>
+                                    <span className="text-slate-300">|</span>
+                                    <Link href="/contact" className="text-xs font-bold text-blue-600 hover:underline">문의하기</Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Ad: 본문 하단 */}
                     <AdBanner slot="9346051403" format="auto" className="mt-8" />
 
@@ -360,7 +383,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                                 {postData.tags.map((tag) => (
                                     <Link
                                         key={tag}
-                                        href={`/search?q=${encodeURIComponent(tag)}`}
+                                        href={`/tag/${encodeURIComponent(tag)}`}
                                         className="px-3 py-1.5 border border-slate-200 text-slate-500 text-xs font-bold rounded-full hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                                     >
                                         #{tag}
@@ -370,8 +393,8 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
                         </div>
                     )}
 
-                    {/* Coupang Partners - 카테고리별 키워드 자동 매핑 */}
-                    <CoupangBanner className="mt-8" />
+                    {/* Coupang Partners - AdSense 승인 전까지 완전 비활성화 */}
+                    {/* <CoupangBanner className="mt-8" /> */}
 
                     {/* Pillar Page Guide Banner */}
                     {(() => {

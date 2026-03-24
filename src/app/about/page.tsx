@@ -19,9 +19,12 @@ export default function About() {
     const orgSchema = {
         '@context': 'https://schema.org',
         '@type': 'Organization',
-        name: 'Ilsanggam Life Studio',
+        name: '일상감 라이프 스튜디오',
+        alternateName: 'Ilsanggam Life Studio',
         url: siteUrl,
         description: '건강, 생활 꿀팁, 테크, 엔터테인먼트까지 일상에 감각을 더하는 실용 정보 블로그',
+        foundingDate: '2026',
+        email: 'isglifestudio@gmail.com',
         sameAs: [],
     };
 
@@ -66,6 +69,17 @@ export default function About() {
                         <li><strong className="text-blue-600">엔터테인먼트 (Entertainment)</strong>: 정주행 추천 드라마, 영화 리뷰, K-POP 등 즐길 거리</li>
                     </ul>
 
+                    <h3 className="text-2xl font-black tracking-tight text-slate-900 mt-12">콘텐츠 제작 과정</h3>
+                    <p>
+                        일상감 라이프 스튜디오의 모든 콘텐츠는 다음과 같은 과정을 거쳐 제작됩니다:
+                    </p>
+                    <ol className="space-y-3">
+                        <li><strong>주제 선정</strong>: 실제 독자들이 궁금해하는 트렌드와 생활 밀착형 주제를 리서치합니다.</li>
+                        <li><strong>자료 조사</strong>: 정부 공식 사이트, 학술 자료, 전문가 의견 등 신뢰할 수 있는 출처를 확인합니다.</li>
+                        <li><strong>콘텐츠 작성</strong>: AI 기술을 활용하여 초안을 작성하고, 편집팀이 팩트체크와 교정을 진행합니다.</li>
+                        <li><strong>품질 검수</strong>: 정보의 정확성, 가독성, 실용성을 기준으로 최종 검수 후 발행합니다.</li>
+                    </ol>
+
                     <h3 className="text-2xl font-black tracking-tight text-slate-900 mt-12">왜 일상감인가요?</h3>
                     <p>
                         하루에도 수백 개의 정보가 쏟아지지만, 정작 내 생활에 도움이 되는 건 몇 개 안 됩니다.
@@ -73,8 +87,36 @@ export default function About() {
                         &quot;이 글 하나 읽었더니 진짜 돈 아꼈다&quot;는 말이 저희의 최고 칭찬입니다.
                     </p>
 
+                    <h3 className="text-2xl font-black tracking-tight text-slate-900 mt-12">운영 정보</h3>
+                    <div className="bg-slate-50 border border-slate-200 rounded-sm p-6 not-prose">
+                        <dl className="space-y-3 text-sm">
+                            <div className="flex gap-2">
+                                <dt className="font-bold text-slate-900 min-w-[80px]">사이트명</dt>
+                                <dd className="text-slate-600">일상감 라이프 스튜디오 (Ilsanggam Life Studio)</dd>
+                            </div>
+                            <div className="flex gap-2">
+                                <dt className="font-bold text-slate-900 min-w-[80px]">운영</dt>
+                                <dd className="text-slate-600">일상감 라이프 스튜디오 편집팀</dd>
+                            </div>
+                            <div className="flex gap-2">
+                                <dt className="font-bold text-slate-900 min-w-[80px]">이메일</dt>
+                                <dd className="text-slate-600">isglifestudio@gmail.com</dd>
+                            </div>
+                            <div className="flex gap-2">
+                                <dt className="font-bold text-slate-900 min-w-[80px]">설립</dt>
+                                <dd className="text-slate-600">2026년</dd>
+                            </div>
+                            <div className="flex gap-2">
+                                <dt className="font-bold text-slate-900 min-w-[80px]">분야</dt>
+                                <dd className="text-slate-600">생활정보, 건강, 테크, 엔터테인먼트</dd>
+                            </div>
+                        </dl>
+                    </div>
+
                     <p className="mt-12 pt-8 border-t border-dashed border-slate-200 text-slate-600 italic">
-                        궁금한 점이나 다뤄줬으면 하는 주제가 있다면 언제든 문의해 주세요.
+                        궁금한 점이나 다뤄줬으면 하는 주제가 있다면{' '}
+                        <Link href="/contact" className="text-blue-600 not-italic font-bold hover:underline">문의 페이지</Link>
+                        를 통해 언제든 연락해 주세요.
                         여러분의 일상에 감각을 더하는 블로그가 되겠습니다.
                     </p>
                 </div>

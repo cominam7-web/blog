@@ -1,60 +1,21 @@
+import crypto from 'crypto';
+
 export const NANOBANANA_REGEX = /[\[［]\s*(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]*?)[\]］]/gi;
 
-export function resolveNanobanana(text: any): string {
-    if (!text) return '';
+// 기본 이미지 스타일 (generate-image API와 동일)
+const STYLE_PREFIX = 'delicate watercolor painting of ';
+const STYLE_SUFFIX = ', soft washes of color, wet-on-wet technique, pastel color palette, paper texture visible, gentle and artistic feel, no text, no letters, no words, no writing, no labels, no typography, no captions, purely visual illustration without any text or writing';
 
-    // YAML에서 [나노바나나: prompt] 구문은 flow sequence로 파싱됨
-    // 예: [{ '나노바나나': 'prompt text' }] 형태가 되므로 재조립 필요
-    let input = '';
-    if (Array.isArray(text)) {
-        const first = text[0];
-        if (first !== null && typeof first === 'object') {
-            // YAML이 { '나노바나나': 'prompt' } 객체로 파싱한 경우 → 태그 문자열로 재조립
-            const entries = Object.entries(first as Record<string, unknown>);
-            input = entries.length > 0 ? `[${entries[0][0]}: ${entries[0][1]}]` : '';
-        } else {
-            input = String(first || '');
-        }
-    } else {
-        input = String(text);
-    }
-
-    if (!input.trim()) return '';
-
-    // Step 1: Extract prompt using a very flexible regex
-    const extractRegex = /(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]+?)(?=[\]］]|$)/i;
-    const match = input.match(extractRegex);
-
-    let prompt = '';
-    if (match && match[1]) {
-        prompt = match[1].trim();
-    } else if (input.length > 15 && !input.startsWith('http')) {
-        prompt = input.replace(/[\[\]［］]/g, '').trim();
-    }
-
-    if (prompt) {
-        let cleanPrompt = prompt
-            .replace(/^(?:나노|nano)[\s\S]*?[:：\-\s]\s*/i, '')
-            .replace(/[\[\]]/g, '')
-            .trim();
-
-        if (cleanPrompt) {
-            return generateImageUrl(cleanPrompt);
-        }
-    }
-
-    return input;
+function buildStyledPrompt(subject: string): string {
+    return `${STYLE_PREFIX}${subject.slice(0, 800)}${STYLE_SUFFIX}`;
 }
 
-function generateImageUrl(prompt: string): string {
-    const safePrompt = prompt.slice(0, 1000).trim();
-    // Gemini Imagen 3 API를 통한 AI 이미지 생성 (서버사이드 API 라우트)
-    return `/api/generate-image?prompt=${encodeURIComponent(safePrompt)}`;
+function promptToHash(prompt: string): string {
+    return crypto.createHash('sha256').update(prompt).digest('hex').slice(0, 16);
 }
 
-// OG 이미지용: Supabase Storage에 이미 저장된 이미지의 정적 public URL 생성
-// 크롤러가 접근해도 Gemini API를 호출하지 않음
-export function resolveNanobananaOgUrl(text: any): string {
+/** 나노바나나 태그에서 프롬프트를 추출하는 공통 로직 */
+function extractPrompt(text: any): string {
     if (!text) return '';
 
     let input = '';
@@ -81,7 +42,7 @@ export function resolveNanobananaOgUrl(text: any): string {
     let prompt = '';
     if (match && match[1]) {
         prompt = match[1].trim();
-    } else if (input.length > 15) {
+    } else if (input.length > 15 && !input.startsWith('http')) {
         prompt = input.replace(/[\[\]［］]/g, '').trim();
     }
 
@@ -91,17 +52,34 @@ export function resolveNanobananaOgUrl(text: any): string {
             .replace(/[\[\]]/g, '')
             .trim();
 
-        if (cleanPrompt) {
-            // generate-image API와 동일한 해시 로직으로 Storage public URL 생성
-            const { createHash } = require('crypto');
-            const STYLE_PREFIX = 'delicate watercolor painting of ';
-            const STYLE_SUFFIX = ', soft washes of color, wet-on-wet technique, pastel color palette, paper texture visible, gentle and artistic feel, no text, no letters, no words, no writing, no labels, no typography, no captions, purely visual illustration without any text or writing';
-            const styledPrompt = `${STYLE_PREFIX}${cleanPrompt.slice(0, 800)}${STYLE_SUFFIX}`;
-            const hash = createHash('sha256').update(styledPrompt).digest('hex').slice(0, 16);
-            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-            return `${supabaseUrl}/storage/v1/object/public/generated-images/${hash}.png`;
-        }
+        if (cleanPrompt) return cleanPrompt;
     }
 
-    return '';
+    return input;
+}
+
+/** Supabase Storage 정적 URL 생성 (크롤러 친화적) */
+function generateStaticImageUrl(cleanPrompt: string): string {
+    const styledPrompt = buildStyledPrompt(cleanPrompt);
+    const hash = promptToHash(styledPrompt);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    return `${supabaseUrl}/storage/v1/object/public/generated-images/${hash}.png`;
+}
+
+/**
+ * 나노바나나 태그를 Supabase Storage 정적 URL로 변환
+ * 크롤러가 직접 접근 가능한 정적 URL을 반환 (기존: /api/generate-image 동적 API)
+ */
+export function resolveNanobanana(text: any): string {
+    const prompt = extractPrompt(text);
+    if (!prompt) return '';
+    if (prompt.startsWith('http')) return prompt;
+    return generateStaticImageUrl(prompt);
+}
+
+/**
+ * OG 이미지용 Supabase Storage 정적 URL (resolveNanobanana와 동일)
+ */
+export function resolveNanobananaOgUrl(text: any): string {
+    return resolveNanobanana(text);
 }

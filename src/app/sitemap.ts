@@ -18,12 +18,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
         };
     })
 
-    const categoryUrls = CATEGORY_SLUGS.map((cat) => ({
-        url: `${baseUrl}/category/${cat}`,
-        lastModified: new Date().toISOString(),
-        changeFrequency: 'daily' as const,
-        priority: 0.8,
-    }));
+    // 카테고리 페이지: 최신 포스트 날짜를 lastModified로 사용
+    const categoryUrls = CATEGORY_SLUGS.map((cat) => {
+        const latestInCategory = cat === 'latest'
+            ? posts[0]
+            : posts.find(p => p.category?.toLowerCase().replace(/ /g, '-') === cat);
+        const lastMod = latestInCategory
+            ? new Date(latestInCategory.date).toISOString()
+            : new Date().toISOString();
+        return {
+            url: `${baseUrl}/category/${cat}`,
+            lastModified: lastMod,
+            changeFrequency: 'daily' as const,
+            priority: 0.8,
+        };
+    });
 
     const guideSlugs = [
         'money-saving-hacks',
@@ -39,11 +48,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.9,
     }))
 
+    // 태그 페이지: 모든 고유 태그에 대한 URL 생성
+    const tagSet = new Set<string>();
+    for (const post of posts) {
+        for (const tag of post.tags) {
+            tagSet.add(tag);
+        }
+    }
+    const tagUrls = Array.from(tagSet).map((tag) => ({
+        url: `${baseUrl}/tag/${encodeURIComponent(tag)}`,
+        lastModified: new Date().toISOString(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.5,
+    }));
+
     const staticPages = [
         { url: `${baseUrl}/about`, changeFrequency: 'monthly' as const, priority: 0.5 },
         { url: `${baseUrl}/contact`, changeFrequency: 'monthly' as const, priority: 0.5 },
         { url: `${baseUrl}/privacy`, changeFrequency: 'monthly' as const, priority: 0.3 },
-    ].map((p) => ({ ...p, lastModified: new Date().toISOString() }));
+        { url: `${baseUrl}/terms`, changeFrequency: 'monthly' as const, priority: 0.3 },
+    ].map((p) => ({ ...p, lastModified: '2026-03-19T00:00:00.000Z' }));
 
     return [
         {
@@ -55,6 +79,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         ...guideUrls,
         ...categoryUrls,
         ...postUrls,
+        ...tagUrls,
         ...staticPages,
     ]
 }
