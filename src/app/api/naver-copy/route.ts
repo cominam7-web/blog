@@ -22,15 +22,16 @@ export async function GET(request: NextRequest) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
 
   // 마크다운을 네이버 블로그 HTML로 변환
-  const html = convertToNaverHtml(post.title, post.content, post.category, siteUrl, slug);
+  const tagList = (post.tags || []).map((t: string) => `#${t}`);
+  const html = convertToNaverHtml(post.title, post.content, post.category, siteUrl, slug, tagList);
 
   // 순수 텍스트 버전 (네이버 스마트에디터용)
-  const plainText = convertToPlainText(post.title, post.content, post.category, siteUrl, slug);
+  const plainText = convertToPlainText(post.title, post.content, post.category, siteUrl, slug, tagList);
 
   return NextResponse.json({
     title: post.title,
     category: post.category,
-    tags: post.tags,
+    tags: (post.tags || []).map((t: string) => `#${t}`),
     html,
     plainText,
     sourceUrl: `${siteUrl}/blog/${slug}`,
@@ -43,6 +44,7 @@ function convertToNaverHtml(
   category: string,
   siteUrl: string,
   slug: string,
+  tags: string[] = [],
 ): string {
   let html = content;
 
@@ -98,6 +100,9 @@ function convertToNaverHtml(
 이 글이 도움이 되셨다면 <b>이웃추가</b>와 <b>공감</b> 부탁드려요! 💙<br/>
 원문 보기: <a href="${siteUrl}/blog/${slug}" style="color:#0068c3">${siteUrl}/blog/${slug}</a>
 </p>
+<p style="text-align:center;font-size:14px;color:#0068c3;margin-top:16px;line-height:2">
+${tags.join(' ')}
+</p>
 </div>`;
 }
 
@@ -107,6 +112,7 @@ function convertToPlainText(
   category: string,
   siteUrl: string,
   slug: string,
+  tags: string[] = [],
 ): string {
   let text = content;
 
@@ -126,5 +132,5 @@ function convertToPlainText(
     category === 'Tech' ? '테크' :
     category === 'Entertainment' ? '엔터테인먼트' : category;
 
-  return `[${categoryLabel}] ${title}\n\n${text}\n\n─────────────────\n이 글이 도움이 되셨다면 이웃추가와 공감 부탁드려요!\n원문: ${siteUrl}/blog/${slug}`;
+  return `[${categoryLabel}] ${title}\n\n${text}\n\n─────────────────\n이 글이 도움이 되셨다면 이웃추가와 공감 부탁드려요!\n원문: ${siteUrl}/blog/${slug}\n\n${tags.join(' ')}`;
 }
