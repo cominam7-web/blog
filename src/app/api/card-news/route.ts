@@ -41,16 +41,18 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // 1. Gemini로 핵심 포인트 추출
-    const { points } = await extractKeyPoints(post.title, post.content, pointCount);
+    // 1. Gemini로 핵심 포인트 + 이미지 프롬프트 추출
+    const { points, intro, coverImagePrompt } = await extractKeyPoints(post.title, post.content, pointCount);
 
-    // 2. 카드뉴스 이미지 생성
+    // 2. 카드뉴스 이미지 생성 (배경 일러스트 포함)
     const result = await generateCardNews(slug, {
       postTitle: post.title,
       excerpt: post.excerpt,
       category: post.category,
+      intro,
       points,
-    });
+      coverImagePrompt,
+    } as any);
 
     // 3. Instagram에 자동 게시 (옵션)
     let instagramPostId: string | undefined;
