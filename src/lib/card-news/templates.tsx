@@ -251,13 +251,13 @@ export function renderSlide(slide: SlideData, category: string): ReactNode {
         background: '#FFFFFF', fontFamily: 'NotoSansKR',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* 배경 이미지 (하단에 크게) */}
+        {/* 배경 이미지 (전체) */}
         {slide.bgImageUrl && (
           <img
             src={slide.bgImageUrl}
             style={{
-              position: 'absolute', bottom: 0, left: 0, width: 1080, height: 700,
-              objectFit: 'cover', opacity: 0.15,
+              position: 'absolute', top: 0, left: 0, width: 1080, height: 1350,
+              objectFit: 'cover', opacity: 0.08,
             }}
           />
         )}
