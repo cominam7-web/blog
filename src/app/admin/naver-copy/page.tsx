@@ -79,23 +79,51 @@ export default function NaverCopyPage() {
     }
   }
 
+  function fallbackCopy(text: string) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+
   async function handleCopyText() {
     if (!result?.plainText) return;
-    await navigator.clipboard.writeText(result.plainText);
+    try {
+      await navigator.clipboard.writeText(result.plainText);
+    } catch { fallbackCopy(result.plainText); }
     setCopied('text');
     setTimeout(() => setCopied(''), 2000);
   }
 
   async function handleCopyTitle() {
     if (!result?.title) return;
-    await navigator.clipboard.writeText(result.title);
+    try {
+      await navigator.clipboard.writeText(result.title);
+    } catch { fallbackCopy(result.title); }
     setCopied('title');
     setTimeout(() => setCopied(''), 2000);
   }
 
   async function handleCopyTags() {
-    if (!result?.tags) return;
-    await navigator.clipboard.writeText(result.tags.join(', '));
+    if (!result?.tags || result.tags.length === 0) return;
+    const tagText = result.tags.join(', ');
+    try {
+      await navigator.clipboard.writeText(tagText);
+    } catch {
+      // fallback: textarea 방식
+      const ta = document.createElement('textarea');
+      ta.value = tagText;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
     setCopied('tags');
     setTimeout(() => setCopied(''), 2000);
   }
