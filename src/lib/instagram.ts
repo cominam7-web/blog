@@ -1,19 +1,132 @@
 // Instagram Graph API를 사용한 캐러셀(카드뉴스) 자동 게시
 
+import { createClient } from '@supabase/supabase-js';
+
 const API_BASE = 'https://graph.instagram.com/v22.0';
+const TOKEN_TABLE = 'instagram_token';
+
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+  );
+}
+
+// Supabase에서 최신 토큰 가져오기 (없으면 env 사용)
+async function getAccessToken(): Promise<string> {
+  try {
+    const sb = getSupabaseAdmin();
+    const { data } = await sb
+      .from(TOKEN_TABLE)
+      .select('access_token, expires_at')
+      .eq('id', 'instagram')
+      .single();
+
+    if (data?.access_token) {
+      return data.access_token;
+    }
+  } catch {
+    // 테이블이 없거나 에러 시 env fallback
+  }
+  return process.env.INSTAGRAM_ACCESS_TOKEN || '';
+}
+
+// 토큰 갱신 (만료 7일 전 자동 갱신)
+export async function refreshTokenIfNeeded(): Promise<{ refreshed: boolean; expiresAt?: string; error?: string }> {
+  const sb = getSupabaseAdmin();
+  const appSecret = process.env.INSTAGRAM_APP_SECRET;
+
+  if (!appSecret) {
+    return { refreshed: false, error: 'INSTAGRAM_APP_SECRET not set' };
+  }
+
+  // DB에서 현재 토큰 정보 가져오기
+  let currentToken = process.env.INSTAGRAM_ACCESS_TOKEN || '';
+  let expiresAt: string | null = null;
+
+  try {
+    const { data } = await sb
+      .from(TOKEN_TABLE)
+      .select('access_token, expires_at')
+      .eq('id', 'instagram')
+      .single();
+
+    if (data) {
+      currentToken = data.access_token;
+      expiresAt = data.expires_at;
+    }
+  } catch {
+    // 첫 실행 시 테이블/레코드 없을 수 있음
+  }
+
+  if (!currentToken) {
+    return { refreshed: false, error: 'No access token found' };
+  }
+
+  // 만료일 확인 (7일 이내면 갱신)
+  if (expiresAt) {
+    const expDate = new Date(expiresAt);
+    const now = new Date();
+    const daysLeft = (expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (daysLeft > 7) {
+      return { refreshed: false, expiresAt };
+    }
+  }
+
+  // 토큰 갱신 요청
+  const res = await fetch(
+    `https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${currentToken}`
+  );
+  const data = await res.json();
+
+  if (data.error) {
+    return { refreshed: false, error: data.error.message };
+  }
+
+  const newToken = data.access_token;
+  const expiresIn = data.expires_in || 5184000; // 기본 60일
+  const newExpiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+  // DB에 저장 (upsert)
+  await sb.from(TOKEN_TABLE).upsert({
+    id: 'instagram',
+    access_token: newToken,
+    expires_at: newExpiresAt,
+    updated_at: new Date().toISOString(),
+  });
+
+  return { refreshed: true, expiresAt: newExpiresAt };
+}
+
+// 토큰을 DB에 초기 저장
+export async function saveTokenToDb(): Promise<void> {
+  const token = process.env.INSTAGRAM_ACCESS_TOKEN;
+  if (!token) return;
+
+  const sb = getSupabaseAdmin();
+  const expiresAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(); // 60일 후
+
+  await sb.from(TOKEN_TABLE).upsert({
+    id: 'instagram',
+    access_token: token,
+    expires_at: expiresAt,
+    updated_at: new Date().toISOString(),
+  });
+}
 
 function getConfig() {
   const accountId = process.env.INSTAGRAM_ACCOUNT_ID;
-  const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN;
-  if (!accountId || !accessToken) {
-    throw new Error('INSTAGRAM_ACCOUNT_ID and INSTAGRAM_ACCESS_TOKEN must be set');
+  if (!accountId) {
+    throw new Error('INSTAGRAM_ACCOUNT_ID must be set');
   }
-  return { accountId, accessToken };
+  return { accountId };
 }
 
 // 단일 이미지 게시
 export async function postSingleImage(imageUrl: string, caption: string): Promise<string> {
-  const { accountId, accessToken } = getConfig();
+  const { accountId } = getConfig();
+  const accessToken = await getAccessToken();
 
   // 1. 미디어 컨테이너 생성
   const createRes = await fetch(`${API_BASE}/${accountId}/media`, {
@@ -53,7 +166,11 @@ export async function postSingleImage(imageUrl: string, caption: string): Promis
 
 // 캐러셀(카드뉴스) 게시
 export async function postCarousel(imageUrls: string[], caption: string): Promise<string> {
-  const { accountId, accessToken } = getConfig();
+  const { accountId } = getConfig();
+  const accessToken = await getAccessToken();
+
+  // 게시 전 토큰 자동 갱신 시도
+  await refreshTokenIfNeeded().catch(() => {});
 
   if (imageUrls.length < 2 || imageUrls.length > 10) {
     throw new Error('Carousel requires 2-10 images');
