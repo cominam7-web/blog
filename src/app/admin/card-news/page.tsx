@@ -32,6 +32,8 @@ export default function CardNewsPage() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [previewIdx, setPreviewIdx] = useState<number | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [publishResult, setPublishResult] = useState('');
 
   useEffect(() => {
     adminFetch('/api/card-news')
@@ -69,6 +71,34 @@ export default function CardNewsPage() {
       setError(e.message || '카드뉴스 생성에 실패했습니다.');
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function handlePublishInstagram() {
+    if (!selectedSlug || images.length < 2) return;
+    setPublishing(true);
+    setPublishResult('');
+    setError('');
+
+    try {
+      const res = await adminFetch('/api/card-news', {
+        method: 'POST',
+        body: JSON.stringify({ slug: selectedSlug, pointCount, publishToInstagram: true }),
+      });
+      const data = await res.json();
+
+      if (data.instagramPostId) {
+        setPublishResult('Instagram에 게시 완료!');
+        setImages(data.images || []);
+      } else if (data.instagramError) {
+        setError(`Instagram 게시 실패: ${data.instagramError}`);
+      } else {
+        setError('Instagram 게시에 실패했습니다.');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Instagram 게시에 실패했습니다.');
+    } finally {
+      setPublishing(false);
     }
   }
 
@@ -196,13 +226,36 @@ export default function CardNewsPage() {
             <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
               3. 결과 미리보기
             </h2>
-            <button
-              onClick={handleDownloadAll}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
-            >
-              전체 다운로드
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handlePublishInstagram}
+                disabled={publishing || images.length < 2}
+                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:from-slate-300 disabled:to-slate-300 text-white text-sm font-bold rounded-lg transition-colors flex items-center gap-2"
+              >
+                {publishing ? (
+                  <>
+                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    게시 중...
+                  </>
+                ) : 'Instagram 게시'}
+              </button>
+              <button
+                onClick={handleDownloadAll}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-lg transition-colors"
+              >
+                전체 다운로드
+              </button>
+            </div>
           </div>
+
+          {publishResult && (
+            <div className="mb-4 p-3 bg-green-50 text-green-700 text-sm rounded-lg font-semibold">
+              {publishResult}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {images.map(img => (

@@ -3,6 +3,7 @@ import { verifyAdmin } from '@/lib/admin-auth';
 import { getPostData, getSortedPostsData } from '@/lib/posts';
 import { extractKeyPoints } from '@/lib/card-news/extract';
 import { generateCardNews } from '@/lib/card-news/generate';
+import { postCarousel, buildCaption } from '@/lib/instagram';
 
 export const maxDuration = 120;
 
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { slug, pointCount = 4 } = body;
+  const { slug, pointCount = 4, publishToInstagram = false } = body;
 
   if (!slug) {
     return NextResponse.json({ error: 'slug is required' }, { status: 400 });
@@ -51,7 +52,22 @@ export async function POST(request: NextRequest) {
       points,
     });
 
-    return NextResponse.json(result);
+    // 3. Instagram에 자동 게시 (옵션)
+    let instagramPostId: string | undefined;
+    if (publishToInstagram && result.images.length >= 2) {
+      try {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://isglifestudio.kr';
+        const caption = buildCaption(post.title, post.excerpt, post.category, siteUrl, slug);
+        const imageUrls = result.images.map(img => img.url);
+        instagramPostId = await postCarousel(imageUrls, caption);
+      } catch (igError: any) {
+        console.error('Instagram publish error:', igError);
+        // Instagram 게시 실패해도 카드뉴스 생성 결과는 반환
+        return NextResponse.json({ ...result, instagramError: igError.message });
+      }
+    }
+
+    return NextResponse.json({ ...result, instagramPostId });
   } catch (error: any) {
     console.error('Card news generation error:', error);
     return NextResponse.json(
