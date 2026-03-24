@@ -7,11 +7,38 @@ import { createClient } from '@supabase/supabase-js';
 
 export const maxDuration = 300;
 
+const BUCKET = 'card-news';
+const TRACKING_FILE = '_posted.json';
+
 function getSupabaseAdmin() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
   );
+}
+
+// Storage 기반 게시 추적 (DB 테이블 불필요)
+async function getPostedSlugs(): Promise<string[]> {
+  try {
+    const sb = getSupabaseAdmin();
+    const { data } = await sb.storage.from(BUCKET).download(TRACKING_FILE);
+    if (data) {
+      const text = await data.text();
+      return JSON.parse(text);
+    }
+  } catch {}
+  return [];
+}
+
+async function addPostedSlug(slug: string): Promise<void> {
+  const sb = getSupabaseAdmin();
+  const existing = await getPostedSlugs();
+  existing.push(slug);
+  const json = JSON.stringify(existing);
+  await sb.storage.from(BUCKET).upload(TRACKING_FILE, json, {
+    contentType: 'application/json',
+    upsert: true,
+  });
 }
 
 export async function GET(request: NextRequest) {
@@ -24,19 +51,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const sb = getSupabaseAdmin();
+    // 1. 이미 게시된 슬러그 목록
+    const postedSlugs = new Set(await getPostedSlugs());
 
-    // 1. 이미 게시된 슬러그 목록 가져오기
-    const { data: posted } = await sb
-      .from('instagram_posts')
-      .select('slug');
-
-    const postedSlugs = new Set((posted || []).map((p: any) => p.slug));
-
-    // 2. Hacks(생활정보) 카테고리 글 중 오래된 순으로 미게시 글 찾기
+    // 2. Hacks 카테고리 오래된 순으로 미게시 글 찾기
     const allPosts = getSortedPostsData()
       .filter(p => p.category === 'Hacks')
-      .reverse(); // 오래된 순
+      .reverse();
 
     const nextPost = allPosts.find(p => !postedSlugs.has(p.slug));
 
@@ -68,12 +89,7 @@ export async function GET(request: NextRequest) {
     const instagramPostId = await postCarousel(imageUrls, caption);
 
     // 6. 게시 기록 저장
-    await sb.from('instagram_posts').insert({
-      slug: nextPost.slug,
-      title: nextPost.title,
-      instagram_post_id: instagramPostId,
-      posted_at: new Date().toISOString(),
-    });
+    await addPostedSlug(nextPost.slug);
 
     return NextResponse.json({
       success: true,
