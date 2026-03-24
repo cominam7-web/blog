@@ -13,20 +13,14 @@ let fontDataCache: ArrayBuffer | null = null;
 async function loadFont(): Promise<ArrayBuffer> {
   if (fontDataCache) return fontDataCache;
 
-  // Google Fonts에서 Noto Sans KR Bold 다운로드
-  const fontUrl = 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap';
-  const cssRes = await fetch(fontUrl, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)' },
-  });
-  const css = await cssRes.text();
+  // Google Fonts에서 Noto Sans KR Bold 직접 다운로드
+  const fontUrl = 'https://fonts.gstatic.com/s/notosanskr/v39/PbyxFmXiEBPT4ITbgNA5Cgms3VYcOA-vvnIzzg01eLQ.ttf';
+  const fontRes = await fetch(fontUrl);
 
-  // CSS에서 woff2 URL 추출 (700 weight 우선)
-  const urlMatch = css.match(/src:\s*url\((https:\/\/fonts\.gstatic\.com\/s\/notosanskr\/[^)]+\.woff2)\)/);
-  if (!urlMatch) {
-    throw new Error('Failed to find Noto Sans KR font URL');
+  if (!fontRes.ok) {
+    throw new Error(`Failed to download font: ${fontRes.status}`);
   }
 
-  const fontRes = await fetch(urlMatch[1]);
   fontDataCache = await fontRes.arrayBuffer();
   return fontDataCache;
 }
