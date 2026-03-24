@@ -164,6 +164,23 @@ export async function postSingleImage(imageUrl: string, caption: string): Promis
   return publishData.id;
 }
 
+// 미디어 컨테이너 상태 확인 (FINISHED가 될 때까지 대기)
+async function waitForMediaReady(containerId: string, accessToken: string, maxRetries = 10): Promise<void> {
+  for (let i = 0; i < maxRetries; i++) {
+    const res = await fetch(`${API_BASE}/${containerId}?fields=status_code&access_token=${accessToken}`);
+    const data = await res.json();
+
+    if (data.status_code === 'FINISHED') return;
+    if (data.status_code === 'ERROR') {
+      throw new Error(`Instagram media processing failed: ${JSON.stringify(data)}`);
+    }
+
+    // 3초 대기 후 재확인
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
+  throw new Error('Instagram media processing timeout');
+}
+
 // 캐러셀(카드뉴스) 게시
 export async function postCarousel(imageUrls: string[], caption: string): Promise<string> {
   const { accountId } = getConfig();
@@ -198,6 +215,11 @@ export async function postCarousel(imageUrls: string[], caption: string): Promis
     childIds.push(data.id);
   }
 
+  // 1.5. 각 미디어 컨테이너가 처리 완료될 때까지 대기
+  for (const childId of childIds) {
+    await waitForMediaReady(childId, accessToken);
+  }
+
   // 2. 캐러셀 컨테이너 생성
   const carouselRes = await fetch(`${API_BASE}/${accountId}/media`, {
     method: 'POST',
@@ -214,6 +236,9 @@ export async function postCarousel(imageUrls: string[], caption: string): Promis
   if (carouselData.error) {
     throw new Error(`Instagram carousel error: ${carouselData.error.message}`);
   }
+
+  // 2.5. 캐러셀 컨테이너 처리 완료 대기
+  await waitForMediaReady(carouselData.id, accessToken);
 
   // 3. 게시
   const publishRes = await fetch(`${API_BASE}/${accountId}/media_publish`, {
