@@ -6,6 +6,9 @@ const BUCKET = 'card-news';
 const WIDTH = 1080;
 const HEIGHT = 1350;
 
+// @sparticuz/chromium 공식 릴리즈 바이너리
+const CHROMIUM_URL = 'https://github.com/nicholaswan/chromium-bidi/releases/download/chromium-v131.0.6778.69/chromium-v131.0.6778.69-pack.tar';
+
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -65,16 +68,16 @@ ${pointsText}
 10. 인포그래픽 스타일: 단순 텍스트 나열이 아닌, 박스/뱃지/그래프/아이콘 등 시각 요소 적극 활용
 11. 각 슬라이드 우하단에 페이지 번호 (1/N 형식)
 12. CSS만 사용 (JavaScript 없음)
+13. 이모지를 아이콘 대용으로 활용 가능
+14. 외부 이미지 URL 사용 금지, CSS만으로 장식
 
 ## 텍스트 줄바꿈 규칙 (매우 중요!)
+- body에 word-break: keep-all 적용하여 한국어 단어 단위 줄바꿈
 - 모든 제목, 숫자+단위, 핵심 키워드에 white-space: nowrap 적용
 - 한국어에서 숫자와 단위는 반드시 한 줄에 표시 (예: "10만 원", "3만 원", "100%", "12월 31일")
 - 숫자+단위 조합은 <span style="white-space:nowrap">으로 감싸기
 - 제목이 너무 길면 폰트 크기를 줄여서라도 어색한 줄바꿈 방지
 - 박스/카드 안의 텍스트는 충분한 너비 확보하여 줄바꿈 최소화
-- word-break: keep-all 을 body에 적용하여 한국어 단어 단위 줄바꿈
-13. 이모지를 아이콘 대용으로 활용 가능
-14. 외부 이미지 URL 사용 금지, CSS만으로 장식
 
 ## 출력 형식
 완전한 HTML 문서 하나를 반환하세요. \`\`\`html 코드블록 안에 넣어주세요.
@@ -115,9 +118,7 @@ ${pointsText}
 
 // Puppeteer로 HTML을 슬라이드별 PNG로 캡처
 async function htmlToSlideImages(html: string, slideCount: number): Promise<Buffer[]> {
-  const executablePath = await chromium.executablePath(
-    'https://github.com/nicholaswan/chromium-bidi/releases/download/chromium-v131.0.6778.69/chromium-v131.0.6778.69-pack.tar'
-  );
+  const executablePath = await chromium.executablePath(CHROMIUM_URL);
 
   const browser = await puppeteer.launch({
     args: chromium.args,
@@ -126,29 +127,29 @@ async function htmlToSlideImages(html: string, slideCount: number): Promise<Buff
     headless: true,
   });
 
-  const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: 'networkidle0', timeout: 30000 });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'networkidle0', timeout: 30000 });
 
-  // 폰트 로딩 대기
-  await page.evaluateHandle('document.fonts.ready');
+    // 폰트 로딩 대기
+    await page.evaluateHandle('document.fonts.ready');
+    await new Promise(r => setTimeout(r, 500));
 
-  const images: Buffer[] = [];
+    const images: Buffer[] = [];
 
-  for (let i = 0; i < slideCount; i++) {
-    // 스크롤 위치 = i * HEIGHT
-    await page.evaluate((y) => window.scrollTo(0, y), i * HEIGHT);
-    await new Promise(r => setTimeout(r, 300));
+    for (let i = 0; i < slideCount; i++) {
+      const screenshot = await page.screenshot({
+        type: 'png',
+        clip: { x: 0, y: i * HEIGHT, width: WIDTH, height: HEIGHT },
+      });
 
-    const screenshot = await page.screenshot({
-      type: 'png',
-      clip: { x: 0, y: i * HEIGHT, width: WIDTH, height: HEIGHT },
-    });
+      images.push(Buffer.from(screenshot));
+    }
 
-    images.push(Buffer.from(screenshot));
+    return images;
+  } finally {
+    await browser.close();
   }
-
-  await browser.close();
-  return images;
 }
 
 export async function generateCardNews(
