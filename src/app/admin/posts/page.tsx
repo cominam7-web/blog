@@ -27,6 +27,8 @@ export default function AdminPostsPage() {
     const [deleting, setDeleting] = useState<string | null>(null);
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [page, setPage] = useState(1);
+    const PAGE_SIZE = 10;
     const router = useRouter();
 
     useEffect(() => {
@@ -68,6 +70,12 @@ export default function AdminPostsPage() {
         const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
         return matchesSearch && matchesCategory;
     });
+
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    // 검색/카테고리 변경 시 1페이지로 리셋
+    useEffect(() => { setPage(1); }, [search, selectedCategory]);
 
     return (
         <div className="p-4 md:p-8 max-w-6xl">
@@ -119,7 +127,7 @@ export default function AdminPostsPage() {
                 <>
                     {/* Mobile: Card Layout */}
                     <div className="space-y-3 md:hidden">
-                        {filtered.map((post) => (
+                        {paged.map((post) => (
                             <div key={post.slug} className="bg-white rounded-xl border border-slate-200 p-4">
                                 <div className="flex items-start justify-between gap-3 mb-2">
                                     <Link href={`/admin/posts/${post.slug}/edit`} className="text-sm font-bold text-slate-800 hover:text-blue-600 line-clamp-2 flex-1">
@@ -167,7 +175,7 @@ export default function AdminPostsPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filtered.map((post) => (
+                                {paged.map((post) => (
                                     <tr key={post.slug} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
                                         <td className="px-4 py-3">
                                             <Link href={`/admin/posts/${post.slug}/edit`} className="text-sm font-medium text-slate-800 hover:text-blue-600 line-clamp-1">
@@ -220,6 +228,42 @@ export default function AdminPostsPage() {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 mt-6 pb-4">
+                            <button
+                                onClick={() => setPage(p => Math.max(1, p - 1))}
+                                disabled={page === 1}
+                                className="px-3 py-1.5 text-sm font-bold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                                ← 이전
+                            </button>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                                <button
+                                    key={p}
+                                    onClick={() => setPage(p)}
+                                    className={`w-8 h-8 text-sm font-bold rounded-lg transition-colors ${
+                                        p === page
+                                            ? 'bg-blue-600 text-white'
+                                            : 'text-slate-500 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                disabled={page === totalPages}
+                                className="px-3 py-1.5 text-sm font-bold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                                다음 →
+                            </button>
+                        </div>
+                    )}
+                    <p className="text-center text-xs text-slate-400 mt-2">
+                        {filtered.length}개 중 {(page - 1) * PAGE_SIZE + 1}-{Math.min(page * PAGE_SIZE, filtered.length)}
+                    </p>
                 </>
             )}
         </div>
