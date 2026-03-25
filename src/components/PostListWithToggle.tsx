@@ -17,7 +17,7 @@ type PostItem = {
 
 type ViewMode = 'grid' | 'list';
 
-const POSTS_PER_PAGE = 6;
+const POSTS_PER_PAGE = 10;
 
 export default function PostListWithToggle({
     posts,

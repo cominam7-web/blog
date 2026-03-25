@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import PaginatedList from '@/components/PaginatedList';
 
 export const metadata: Metadata = {
     title: 'Search',
@@ -34,7 +35,7 @@ async function SearchResults({ query }: { query: string }) {
 
                 {/* Results Grid */}
                 {results.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-12">
+                    <PaginatedList>
                         {results.map((post) => (
                             <article key={post.slug} className="group border-b border-dashed border-slate-200 pb-12 last:border-0 flex flex-col md:flex-row gap-8">
                                 <Link href={`/blog/${post.slug}`} className="md:w-1/3 relative aspect-video overflow-hidden rounded-sm bg-slate-50 flex-shrink-0">
@@ -72,7 +73,7 @@ async function SearchResults({ query }: { query: string }) {
                                 </div>
                             </article>
                         ))}
-                    </div>
+                    </PaginatedList>
                 ) : (
                     <div className="text-center py-32 bg-slate-50 border border-dashed border-slate-200 rounded-sm">
                         <div className="text-4xl mb-6">🔍</div>
