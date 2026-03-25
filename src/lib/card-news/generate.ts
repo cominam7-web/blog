@@ -6,8 +6,8 @@ const BUCKET = 'card-news';
 const WIDTH = 1080;
 const HEIGHT = 1350;
 
-// @sparticuz/chromium 공식 릴리즈 바이너리
-const CHROMIUM_URL = 'https://github.com/nicholaswan/chromium-bidi/releases/download/chromium-v131.0.6778.69/chromium-v131.0.6778.69-pack.tar';
+// @sparticuz/chromium 공식 릴리즈 바이너리 (v143.0.4, x64)
+const CHROMIUM_URL = 'https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.x64.tar';
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
