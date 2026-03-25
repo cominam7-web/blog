@@ -106,25 +106,9 @@ export function renderSlide(slide: SlideData, category: string): ReactNode {
     return (
       <div style={{
         width: 1080, height: 1350, display: 'flex', flexDirection: 'column',
-        background: theme.dark, fontFamily: 'NotoSansKR', position: 'relative',
+        background: 'rgba(0,0,0,0.55)', fontFamily: 'NotoSansKR', position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* 배경 이미지 (있으면) */}
-        {slide.bgImageUrl && (
-          <img
-            src={slide.bgImageUrl}
-            style={{
-              position: 'absolute', top: 0, left: 0, width: 1080, height: 1350,
-              objectFit: 'cover', opacity: 0.3,
-            }}
-          />
-        )}
-        {/* 그라데이션 오버레이 */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, width: 1080, height: 1350,
-          display: 'flex',
-          background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%)',
-        }} />
 
         <div style={{
           display: 'flex', flexDirection: 'column', flex: 1,
@@ -248,21 +232,10 @@ export function renderSlide(slide: SlideData, category: string): ReactNode {
     return (
       <div style={{
         width: 1080, height: 1350, display: 'flex', flexDirection: 'column',
-        background: '#FFFFFF', fontFamily: 'NotoSansKR',
+        background: 'rgba(255,255,255,0.88)', fontFamily: 'NotoSansKR',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* 배경 이미지 (전체) */}
-        {slide.bgImageUrl && (
-          <img
-            src={slide.bgImageUrl}
-            style={{
-              position: 'absolute', top: 0, left: 0, width: 1080, height: 1350,
-              objectFit: 'cover', opacity: 0.08,
-            }}
-          />
-        )}
-
-        {/* 상단 컬러 바 */}
+          {/* 상단 컬러 바 */}
         <div style={{
           display: 'flex', width: 1080, height: 8, background: theme.primary,
         }} />
