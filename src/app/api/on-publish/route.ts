@@ -23,6 +23,7 @@ function getSupabaseAdmin() {
  *
  * POST /api/on-publish
  * Body: { slug: "post-20260324-1200", image_prompt: "..." }
+ * (content는 Supabase에서 자동으로 읽음 — body에 포함 불필요)
  * Header: Authorization: Bearer {ADMIN_API_KEY}
  *
  * 처리 순서:
@@ -41,7 +42,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const slug: string = body.slug || '';
     const imagePrompt: string = body.image_prompt || '';
-    const content: string = body.content || '';
 
     if (!slug) {
         return NextResponse.json({ error: 'slug is required' }, { status: 400 });
@@ -53,12 +53,25 @@ export async function POST(request: NextRequest) {
     const prompts = new Set<string>();
     if (imagePrompt) prompts.add(imagePrompt);
 
-    // 본문에서 [나노바나나: ...] 태그 추출
-    const nanoRegex = /[\[［]\s*(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]*?)[\]］]/gi;
-    let match;
-    while ((match = nanoRegex.exec(content)) !== null) {
-        const p = match[1]?.trim();
-        if (p) prompts.add(p);
+    // Supabase에서 본문 content를 읽어 나노바나나 태그 추출
+    try {
+        const sb = getSupabaseAdmin();
+        const { data: postData } = await sb
+            .from('posts')
+            .select('content')
+            .eq('slug', slug)
+            .single();
+
+        if (postData?.content) {
+            const nanoRegex = /[\[［]\s*(?:나노|nano)[\s\S]*?[:：\-\s]\s*([\s\S]*?)[\]］]/gi;
+            let match;
+            while ((match = nanoRegex.exec(postData.content)) !== null) {
+                const p = match[1]?.trim();
+                if (p) prompts.add(p);
+            }
+        }
+    } catch {
+        // Supabase 읽기 실패해도 대표 이미지는 생성
     }
 
     if (prompts.size > 0) {
