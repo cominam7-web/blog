@@ -20,12 +20,20 @@ function extractPrompt(text: any): string {
 
     let input = '';
     if (Array.isArray(text)) {
+        // gray-matter가 YAML [나노바나나: prompt, with commas] 를 배열로 파싱함
+        // 첫 요소는 {나노바나나: "..."} 객체, 나머지는 쉼표로 분리된 문자열
+        // 원본 프롬프트를 복원하기 위해 모두 합침
         const first = text[0];
         if (first !== null && typeof first === 'object') {
             const entries = Object.entries(first as Record<string, unknown>);
-            input = entries.length > 0 ? `[${entries[0][0]}: ${entries[0][1]}]` : '';
+            if (entries.length > 0) {
+                const rest = text.slice(1).map(String).join(', ');
+                const value = rest ? `${entries[0][1]}, ${rest}` : String(entries[0][1] || '');
+                input = `[${entries[0][0]}: ${value}]`;
+            }
         } else {
-            input = String(first || '');
+            const joined = text.map(String).join(', ');
+            input = joined;
         }
     } else {
         input = String(text);
