@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Noto_Sans_KR } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
 
 const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
@@ -112,6 +113,7 @@ export default function RootLayout({
             {children}
           </div>
           <Footer />
+          <CookieConsent />
         </div>
       </body>
     </html>
