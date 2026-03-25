@@ -1,29 +1,10 @@
-import satori from 'satori';
-import sharp from 'sharp';
-import { renderSlide, buildSlides, type CardNewsInput, type SlideData } from './templates';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 
 const BUCKET = 'card-news';
-const IMAGE_BUCKET = 'generated-images';
 const WIDTH = 1080;
 const HEIGHT = 1350;
-
-let fontDataCache: ArrayBuffer | null = null;
-
-async function loadFont(): Promise<ArrayBuffer> {
-  if (fontDataCache) return fontDataCache;
-
-  const fontUrl = 'https://fonts.gstatic.com/s/notosanskr/v39/PbyxFmXiEBPT4ITbgNA5Cgms3VYcOA-vvnIzzg01eLQ.ttf';
-  const fontRes = await fetch(fontUrl);
-
-  if (!fontRes.ok) {
-    throw new Error(`Failed to download font: ${fontRes.status}`);
-  }
-
-  fontDataCache = await fontRes.arrayBuffer();
-  return fontDataCache;
-}
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -31,155 +12,162 @@ function getSupabaseAdmin() {
   return createClient(url, key);
 }
 
-// 카테고리별 배경 스타일
-const CATEGORY_BG_STYLE: Record<string, string> = {
-  Hacks: 'dark navy blue background with golden geometric lines, abstract diamond shapes, subtle star particles, luxury finance magazine aesthetic',
-  Health: 'dark emerald green background with soft leaf patterns, organic flowing curves, subtle nature elements, wellness magazine aesthetic',
-  Tech: 'dark indigo purple background with neon circuit patterns, digital grid lines, glowing nodes, futuristic tech magazine aesthetic',
-  Entertainment: 'dark warm charcoal background with vibrant red and orange geometric bursts, spotlight effects, entertainment magazine aesthetic',
-};
-
-// Gemini로 배경 그래픽만 생성 (텍스트 없이)
-async function generateBgGraphic(category: string, context: string): Promise<Buffer | null> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return null;
-
-  const bgStyle = CATEGORY_BG_STYLE[category] || CATEGORY_BG_STYLE.Hacks;
-  const prompt = `Create a decorative background graphic for an Instagram card (1080x1350 portrait).
-${bgStyle}.
-Context: ${context}.
-Include relevant simple icons or illustrations as decorative elements.
-ABSOLUTELY NO TEXT, NO LETTERS, NO WORDS, NO NUMBERS, NO WRITING of any kind.
-Pure visual decoration only - geometric shapes, icons, patterns, gradients.
-The design should leave space in the center for text to be overlaid later.`;
-
-  const hash = crypto.createHash('sha256').update(prompt).digest('hex').slice(0, 16);
-  const filePath = `bg-${hash}.png`;
-
-  const sb = getSupabaseAdmin();
-
-  // 캐시 확인
-  const { data: existing } = await sb.storage.from(IMAGE_BUCKET).download(filePath);
-  if (existing) {
-    const buf = Buffer.from(await existing.arrayBuffer());
-    return buf;
-  }
-
-  try {
-    const model = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { responseModalities: ['IMAGE', 'TEXT'] },
-        }),
-      }
-    );
-
-    if (!res.ok) return null;
-
-    const json = await res.json();
-    const parts: any[] = json.candidates?.[0]?.content?.parts ?? [];
-    const imagePart = parts.find((p: any) => p.inlineData?.data);
-    if (!imagePart) return null;
-
-    const buf = Buffer.from(imagePart.inlineData.data, 'base64');
-
-    await sb.storage.from(IMAGE_BUCKET).upload(filePath, buf, {
-      contentType: 'image/png',
-      upsert: false,
-    }).catch(() => {});
-
-    return buf;
-  } catch (e) {
-    console.error('Background generation failed:', e);
-    return null;
-  }
+export interface CardNewsInput {
+  postTitle: string;
+  excerpt: string;
+  category: string;
+  intro: string;
+  points: { title: string; detail: string; imagePrompt?: string }[];
+  coverImagePrompt?: string;
+  bgImageUrls?: string[];
 }
-
-// 배경 + 텍스트 오버레이 합성
-async function renderSlideWithBg(
-  slide: SlideData,
-  category: string,
-  fontData: ArrayBuffer,
-  bgBuffer: Buffer | null,
-): Promise<Buffer> {
-  // 1. Satori로 텍스트 레이어 생성 (투명 배경)
-  const element = renderSlide(slide, category);
-  const svg = await satori(element as React.ReactNode, {
-    width: WIDTH,
-    height: HEIGHT,
-    fonts: [
-      { name: 'NotoSansKR', data: fontData, weight: 700, style: 'normal' as const },
-    ],
-  });
-
-  const textLayer = await sharp(Buffer.from(svg))
-    .resize(WIDTH, HEIGHT)
-    .png()
-    .toBuffer();
-
-  if (!bgBuffer) {
-    return textLayer;
-  }
-
-  // 2. 배경 이미지를 1080x1350으로 리사이즈
-  const bgResized = await sharp(bgBuffer)
-    .resize(WIDTH, HEIGHT, { fit: 'cover' })
-    .png()
-    .toBuffer();
-
-  // 3. 배경 위에 텍스트 레이어 합성
-  const composited = await sharp(bgResized)
-    .composite([{ input: textLayer, top: 0, left: 0 }])
-    .png()
-    .toBuffer();
-
-  return composited;
-}
-
-export type { CardNewsInput } from './templates';
 
 export interface GenerateResult {
   slug: string;
   images: { index: number; url: string; type: string }[];
 }
 
+// Gemini에게 전체 카드뉴스 HTML 생성 요청
+async function generateCardHtml(input: CardNewsInput): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY not set');
+
+  const pointsText = input.points.map((p, i) =>
+    `슬라이드${i + 3}: 번호 "${String(i + 1).padStart(2, '0')}", 제목 "${p.title}", 설명 "${p.detail}"`
+  ).join('\n');
+
+  const prompt = `당신은 인스타그램 카드뉴스 HTML 디자이너입니다.
+아래 블로그 글 정보로 카드뉴스 HTML을 만들어주세요.
+
+## 블로그 정보
+- 제목: ${input.postTitle}
+- 소개: ${input.excerpt}
+- 인트로: ${input.intro}
+- 카테고리: ${input.category}
+- 브랜드: ILSANGGAM
+
+## 슬라이드 구성
+슬라이드1 (COVER): 제목 "${input.postTitle}", 부제 "${input.excerpt}"
+슬라이드2 (INTRO): "${input.intro}", 하단에 "핵심만 쏙쏙 정리했습니다"
+${pointsText}
+슬라이드${input.points.length + 3} (CTA): "더 자세한 내용이 궁금하다면?", "프로필 링크에서 전체 글 보기", "@ilsanggam", "isglifestudio.kr"
+
+## 디자인 규칙 (필수)
+1. 각 슬라이드는 정확히 1080px × 1350px
+2. 글 주제에 어울리는 컬러 스킴 선택 (매번 다른 느낌)
+3. 모든 카드를 세로로 나열, 카드 사이 간격 없음
+4. 한국어 폰트: font-family: 'Noto Sans KR', sans-serif
+5. Google Fonts import 포함
+6. COVER: 다크 배경, 큰 타이포그래피, 장식 도형/그라데이션
+7. INTRO: 큰 따옴표 장식, 중앙 정렬, 인상적인 배경
+8. CONTENT: 큰 번호, 굵은 제목, 설명, 데이터 시각화 요소 (막대그래프/비교박스/아이콘 등 활용)
+9. CTA: 다크 배경, 브랜드 강조, 인스타 핸들
+10. 인포그래픽 스타일: 단순 텍스트 나열이 아닌, 박스/뱃지/그래프/아이콘 등 시각 요소 적극 활용
+11. 각 슬라이드 우하단에 페이지 번호 (1/N 형식)
+12. CSS만 사용 (JavaScript 없음)
+
+## 텍스트 줄바꿈 규칙 (매우 중요!)
+- 모든 제목, 숫자+단위, 핵심 키워드에 white-space: nowrap 적용
+- 한국어에서 숫자와 단위는 반드시 한 줄에 표시 (예: "10만 원", "3만 원", "100%", "12월 31일")
+- 숫자+단위 조합은 <span style="white-space:nowrap">으로 감싸기
+- 제목이 너무 길면 폰트 크기를 줄여서라도 어색한 줄바꿈 방지
+- 박스/카드 안의 텍스트는 충분한 너비 확보하여 줄바꿈 최소화
+- word-break: keep-all 을 body에 적용하여 한국어 단어 단위 줄바꿈
+13. 이모지를 아이콘 대용으로 활용 가능
+14. 외부 이미지 URL 사용 금지, CSS만으로 장식
+
+## 출력 형식
+완전한 HTML 문서 하나를 반환하세요. \`\`\`html 코드블록 안에 넣어주세요.
+<!DOCTYPE html>부터 </html>까지 전체를 포함하세요.`;
+
+  const model = process.env.GEMINI_TEXT_MODEL || 'gemini-2.5-flash';
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.8, maxOutputTokens: 30000 },
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Gemini API failed: ${res.status}`);
+  }
+
+  const json = await res.json();
+  const text = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+  // HTML 코드블록 추출
+  const htmlMatch = text.match(/```html\s*([\s\S]*?)```/);
+  if (htmlMatch) return htmlMatch[1].trim();
+
+  // 코드블록 없이 HTML 직접 반환된 경우
+  if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+    const start = text.indexOf('<!DOCTYPE') !== -1 ? text.indexOf('<!DOCTYPE') : text.indexOf('<html');
+    return text.slice(start).trim();
+  }
+
+  throw new Error('Failed to extract HTML from Gemini response');
+}
+
+// Puppeteer로 HTML을 슬라이드별 PNG로 캡처
+async function htmlToSlideImages(html: string, slideCount: number): Promise<Buffer[]> {
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: { width: WIDTH, height: HEIGHT },
+    executablePath: await chromium.executablePath(),
+    headless: true,
+  });
+
+  const page = await browser.newPage();
+  await page.setContent(html, { waitUntil: 'networkidle0', timeout: 30000 });
+
+  // 폰트 로딩 대기
+  await page.evaluateHandle('document.fonts.ready');
+
+  const images: Buffer[] = [];
+
+  for (let i = 0; i < slideCount; i++) {
+    // 스크롤 위치 = i * HEIGHT
+    await page.evaluate((y) => window.scrollTo(0, y), i * HEIGHT);
+    await new Promise(r => setTimeout(r, 300));
+
+    const screenshot = await page.screenshot({
+      type: 'png',
+      clip: { x: 0, y: i * HEIGHT, width: WIDTH, height: HEIGHT },
+    });
+
+    images.push(Buffer.from(screenshot));
+  }
+
+  await browser.close();
+  return images;
+}
+
 export async function generateCardNews(
   slug: string,
   input: CardNewsInput,
 ): Promise<GenerateResult> {
-  const fontData = await loadFont();
-  const slides = buildSlides(input);
+  const slideCount = input.points.length + 3; // cover + intro + points + cta
+
+  // 1. Gemini로 HTML 생성
+  const html = await generateCardHtml(input);
+
+  // 2. Puppeteer로 슬라이드별 스크린샷
+  const slideImages = await htmlToSlideImages(html, slideCount);
+
+  // 3. Supabase에 업로드
   const sb = getSupabaseAdmin();
-
-  // 배경 이미지를 병렬로 생성 (cover, content 슬라이드에만)
-  const bgBuffers: (Buffer | null)[] = [];
-  for (const slide of slides) {
-    if (slide.type === 'cover') {
-      const bg = await generateBgGraphic(input.category, `cover for: ${input.postTitle}`);
-      bgBuffers.push(bg);
-    } else if (slide.type === 'content') {
-      const bg = await generateBgGraphic(input.category, `content about: ${slide.point}`);
-      bgBuffers.push(bg);
-    } else {
-      // intro, cta는 배경 없이 그라데이션만 사용
-      bgBuffers.push(null);
-    }
-  }
-
   const images: { index: number; url: string; type: string }[] = [];
+  const types = ['cover', 'intro', ...input.points.map(() => 'content'), 'cta'];
 
-  for (let i = 0; i < slides.length; i++) {
-    const slide = slides[i];
-    const pngBuffer = await renderSlideWithBg(slide, input.category, fontData, bgBuffers[i]);
-
+  for (let i = 0; i < slideImages.length; i++) {
     const filePath = `${slug}/slide-${i + 1}.png`;
 
-    const { error } = await sb.storage.from(BUCKET).upload(filePath, pngBuffer, {
+    const { error } = await sb.storage.from(BUCKET).upload(filePath, slideImages[i], {
       contentType: 'image/png',
       upsert: true,
     });
@@ -192,9 +180,15 @@ export async function generateCardNews(
     images.push({
       index: i + 1,
       url: urlData.publicUrl,
-      type: slide.type,
+      type: types[i] || 'content',
     });
   }
+
+  // 4. HTML도 저장 (나중에 수정 가능)
+  await sb.storage.from(BUCKET).upload(`${slug}/source.html`, html, {
+    contentType: 'text/html',
+    upsert: true,
+  });
 
   return { slug, images };
 }
