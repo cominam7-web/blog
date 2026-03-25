@@ -5,7 +5,7 @@ import { extractKeyPoints } from '@/lib/card-news/extract';
 import { generateCardNews } from '@/lib/card-news/generate';
 import { postCarousel, buildCaption } from '@/lib/instagram';
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 // GET: 포스트 목록 반환 (카드뉴스 생성용)
 export async function GET() {

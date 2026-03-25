@@ -1,29 +1,6 @@
-import satori from 'satori';
-import sharp from 'sharp';
-import { renderSlide, buildSlides, type CardNewsInput, type SlideData } from './templates';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
 
-const CARD_NEWS_BUCKET = 'card-news';
-const IMAGE_BUCKET = 'generated-images';
-const WIDTH = 1080;
-const HEIGHT = 1350;
-
-let fontDataCache: ArrayBuffer | null = null;
-
-async function loadFont(): Promise<ArrayBuffer> {
-  if (fontDataCache) return fontDataCache;
-
-  const fontUrl = 'https://fonts.gstatic.com/s/notosanskr/v39/PbyxFmXiEBPT4ITbgNA5Cgms3VYcOA-vvnIzzg01eLQ.ttf';
-  const fontRes = await fetch(fontUrl);
-
-  if (!fontRes.ok) {
-    throw new Error(`Failed to download font: ${fontRes.status}`);
-  }
-
-  fontDataCache = await fontRes.arrayBuffer();
-  return fontDataCache;
-}
+const BUCKET = 'card-news';
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -31,25 +8,34 @@ function getSupabaseAdmin() {
   return createClient(url, key);
 }
 
-// Gemini로 배경 일러스트 이미지 생성
-async function generateBgImage(prompt: string): Promise<string | null> {
+export interface CardNewsInput {
+  postTitle: string;
+  excerpt: string;
+  category: string;
+  intro: string;
+  points: { title: string; detail: string; imagePrompt?: string }[];
+  coverImagePrompt?: string;
+  bgImageUrls?: string[];
+}
+
+export interface GenerateResult {
+  slug: string;
+  images: { index: number; url: string; type: string }[];
+}
+
+// 카테고리별 디자인 힌트
+const CATEGORY_STYLE: Record<string, string> = {
+  Hacks: 'blue and navy color scheme, clean modern finance/lifestyle magazine style',
+  Health: 'green and teal color scheme, fresh wellness magazine style',
+  Tech: 'purple and indigo color scheme, futuristic tech magazine style',
+  Entertainment: 'red and orange warm color scheme, vibrant entertainment magazine style',
+};
+
+// Gemini로 카드뉴스 이미지 직접 생성
+async function generateSlideImage(prompt: string): Promise<Buffer | null> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || !prompt) return null;
+  if (!apiKey) return null;
 
-  const styledPrompt = `minimalist flat design illustration, ${prompt}, simple shapes, clean lines, muted colors, no text, no letters, no words, white background, modern graphic design style`;
-  const hash = crypto.createHash('sha256').update(styledPrompt).digest('hex').slice(0, 16);
-  const filePath = `cardnews-${hash}.png`;
-
-  const sb = getSupabaseAdmin();
-
-  // 캐시 확인
-  const { data: existing } = await sb.storage.from(IMAGE_BUCKET).download(filePath);
-  if (existing) {
-    const { data: urlData } = sb.storage.from(IMAGE_BUCKET).getPublicUrl(filePath);
-    return urlData.publicUrl;
-  }
-
-  // Gemini 이미지 생성
   try {
     const model = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
     const res = await fetch(
@@ -58,102 +44,125 @@ async function generateBgImage(prompt: string): Promise<string | null> {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: styledPrompt }] }],
+          contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { responseModalities: ['IMAGE', 'TEXT'] },
         }),
       }
     );
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error('Gemini image API error:', res.status, await res.text());
+      return null;
+    }
 
     const json = await res.json();
     const parts: any[] = json.candidates?.[0]?.content?.parts ?? [];
     const imagePart = parts.find((p: any) => p.inlineData?.data);
     if (!imagePart) return null;
 
-    const buf = Buffer.from(imagePart.inlineData.data, 'base64');
-
-    await sb.storage.from(IMAGE_BUCKET).upload(filePath, buf, {
-      contentType: 'image/png',
-      upsert: false,
-    });
-
-    const { data: urlData } = sb.storage.from(IMAGE_BUCKET).getPublicUrl(filePath);
-    return urlData.publicUrl;
+    return Buffer.from(imagePart.inlineData.data, 'base64');
   } catch (e) {
-    console.error('Background image generation failed:', e);
+    console.error('Slide image generation failed:', e);
     return null;
   }
 }
 
-async function renderSlideToPng(slide: SlideData, category: string, fontData: ArrayBuffer): Promise<Buffer> {
-  const element = renderSlide(slide, category);
+function buildSlidePrompts(input: CardNewsInput): { type: string; prompt: string }[] {
+  const style = CATEGORY_STYLE[input.category] || CATEGORY_STYLE.Hacks;
+  const brand = 'ILSANGGAM';
+  const total = input.points.length + 3; // cover + intro + points + cta
 
-  const svg = await satori(element as React.ReactNode, {
-    width: WIDTH,
-    height: HEIGHT,
-    fonts: [
-      {
-        name: 'NotoSansKR',
-        data: fontData,
-        weight: 700,
-        style: 'normal',
-      },
-    ],
+  const baseStyle = `Instagram carousel card image, 1080x1350 pixels portrait orientation, ${style}, professional Korean infographic design, bold Korean typography, high contrast, eye-catching layout, modern graphic design with decorative elements and icons`;
+
+  const slides: { type: string; prompt: string }[] = [];
+
+  // 1. COVER
+  slides.push({
+    type: 'cover',
+    prompt: `${baseStyle}.
+COVER SLIDE (1/${total}).
+Large bold title text in Korean: "${input.postTitle}"
+Subtitle: "${input.excerpt}"
+Small brand logo text "${brand}" at top left.
+Dark dramatic background with accent color graphics and abstract shapes.
+The title should be the dominant visual element, centered or left-aligned with large font.
+Include decorative geometric elements, lines, or relevant icons.
+NO English text except the brand name.`,
   });
 
-  const pngBuffer = await sharp(Buffer.from(svg))
-    .resize(WIDTH, HEIGHT)
-    .png()
-    .toBuffer();
+  // 2. INTRO
+  slides.push({
+    type: 'intro',
+    prompt: `${baseStyle}.
+INTRO SLIDE (2/${total}).
+Large decorative quotation mark at top.
+Main text in Korean: "${input.intro}"
+Below it, smaller text: "핵심만 쏙쏙 정리했습니다"
+Brand "${brand}" small at top.
+Gradient background with the accent color.
+Elegant, minimal layout with plenty of white space.
+NO English text except the brand name.`,
+  });
 
-  return pngBuffer;
-}
+  // 3~N. CONTENT slides
+  input.points.forEach((point, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    slides.push({
+      type: 'content',
+      prompt: `${baseStyle}.
+CONTENT SLIDE (${i + 3}/${total}).
+Large number "${num}" as a design element with accent color.
+Bold title in Korean: "${point.title}"
+Description text in Korean: "${point.detail}"
+Brand "${brand}" small at top.
+White or light background with accent color elements.
+Include a relevant simple icon or illustration related to the topic.
+Clean layout with clear visual hierarchy: number → title → description.
+NO English text except the brand name and number.`,
+    });
+  });
 
-export interface GenerateResult {
-  slug: string;
-  images: { index: number; url: string; type: string }[];
+  // LAST. CTA
+  slides.push({
+    type: 'cta',
+    prompt: `${baseStyle}.
+CTA (Call to Action) SLIDE (${total}/${total}).
+Brand "${brand}" large at center top.
+Main text in Korean: "더 자세한 내용이 궁금하다면?"
+Below: "프로필 링크에서 전체 글 보기"
+Instagram handle: "@ilsanggam"
+Website: "isglifestudio.kr"
+Dark background with accent color highlights.
+Modern, clean, inviting design.
+Include a subtle arrow or pointing element toward "프로필 링크".
+NO other English text.`,
+  });
+
+  return slides;
 }
 
 export async function generateCardNews(
   slug: string,
   input: CardNewsInput,
 ): Promise<GenerateResult> {
-  const fontData = await loadFont();
-
-  // 배경 이미지 생성 (표지 + 각 포인트)
-  const imagePrompts = [
-    input.bgImageUrls?.[0] ? '' : (input as any).coverImagePrompt || '',
-    ...input.points.map(p => p.imagePrompt || ''),
-  ];
-
-  const bgImageUrls: string[] = [];
-  for (const prompt of imagePrompts) {
-    if (prompt) {
-      const url = await generateBgImage(prompt);
-      bgImageUrls.push(url || '');
-    } else {
-      bgImageUrls.push('');
-    }
-  }
-
-  const fullInput: CardNewsInput = {
-    ...input,
-    bgImageUrls: bgImageUrls.length > 0 ? bgImageUrls : undefined,
-  };
-
-  const slides = buildSlides(fullInput);
+  const slidePrompts = buildSlidePrompts(input);
   const sb = getSupabaseAdmin();
 
   const images: { index: number; url: string; type: string }[] = [];
 
-  for (let i = 0; i < slides.length; i++) {
-    const slide = slides[i];
-    const pngBuffer = await renderSlideToPng(slide, input.category, fontData);
+  for (let i = 0; i < slidePrompts.length; i++) {
+    const { type, prompt } = slidePrompts[i];
+
+    const pngBuffer = await generateSlideImage(prompt);
+
+    if (!pngBuffer) {
+      console.error(`Failed to generate slide ${i + 1}`);
+      continue;
+    }
 
     const filePath = `${slug}/slide-${i + 1}.png`;
 
-    const { error } = await sb.storage.from(CARD_NEWS_BUCKET).upload(filePath, pngBuffer, {
+    const { error } = await sb.storage.from(BUCKET).upload(filePath, pngBuffer, {
       contentType: 'image/png',
       upsert: true,
     });
@@ -162,11 +171,11 @@ export async function generateCardNews(
       console.error(`Upload error for slide ${i + 1}:`, error.message);
     }
 
-    const { data: urlData } = sb.storage.from(CARD_NEWS_BUCKET).getPublicUrl(filePath);
+    const { data: urlData } = sb.storage.from(BUCKET).getPublicUrl(filePath);
     images.push({
       index: i + 1,
       url: urlData.publicUrl,
-      type: slide.type,
+      type,
     });
   }
 
