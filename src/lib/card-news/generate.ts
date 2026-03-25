@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 
 const BUCKET = 'card-news';
 const WIDTH = 1080;
@@ -115,10 +115,14 @@ ${pointsText}
 
 // Puppeteer로 HTML을 슬라이드별 PNG로 캡처
 async function htmlToSlideImages(html: string, slideCount: number): Promise<Buffer[]> {
+  const executablePath = await chromium.executablePath(
+    'https://github.com/nicholaswan/chromium-bidi/releases/download/chromium-v131.0.6778.69/chromium-v131.0.6778.69-pack.tar'
+  );
+
   const browser = await puppeteer.launch({
     args: chromium.args,
     defaultViewport: { width: WIDTH, height: HEIGHT },
-    executablePath: await chromium.executablePath(),
+    executablePath,
     headless: true,
   });
 
