@@ -43,10 +43,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, excerpt, category, tags, imagePrompt, image_prompt, content, slugSuffix } = body;
+    const { title, excerpt, category, tags, imagePrompt, image_prompt, content, contentBase64, slugSuffix } = body;
     const resolvedImagePrompt: string = imagePrompt || image_prompt || '';
 
-    if (!title || !content) {
+    // content 또는 contentBase64(Make.com에서 base64 인코딩) 지원
+    const resolvedContent = content || (contentBase64 ? Buffer.from(contentBase64, 'base64').toString('utf-8') : '');
+
+    if (!title || !resolvedContent) {
         return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
     }
 
@@ -70,7 +73,7 @@ tags: [${tagsArray.join(', ')}]
 image: ${imageField}
 ---
 
-${content}`;
+${resolvedContent}`;
 
     // 1. Push to GitHub
     const ghResult = await createOrUpdateFile(
