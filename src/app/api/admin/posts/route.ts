@@ -43,11 +43,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, excerpt, category, tags, imagePrompt, image_prompt, content, contentBase64, slugSuffix } = body;
-    const resolvedImagePrompt: string = imagePrompt || image_prompt || '';
+    const b64 = (v: string) => v ? Buffer.from(v, 'base64').toString('utf-8') : '';
 
-    // content 또는 contentBase64(Make.com에서 base64 인코딩) 지원
-    const resolvedContent = content || (contentBase64 ? Buffer.from(contentBase64, 'base64').toString('utf-8') : '');
+    // Make.com: base64 인코딩 필드 (titleB64 등) / 어드민 패널: 일반 필드 (title 등)
+    const title = body.title || b64(body.titleB64);
+    const excerpt = body.excerpt || b64(body.excerptB64);
+    const category = body.category || '';
+    const tags = body.tags || b64(body.tagsB64);
+    const resolvedImagePrompt: string = body.imagePrompt || body.image_prompt || b64(body.image_prompt) || '';
+    const resolvedContent = body.content || b64(body.contentBase64) || b64(body.contentB64);
+    const slugSuffix = body.slugSuffix || '';
 
     if (!title || !resolvedContent) {
         return NextResponse.json({ error: 'Title and content are required' }, { status: 400 });
