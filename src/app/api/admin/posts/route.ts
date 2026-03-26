@@ -45,13 +45,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const b64 = (v: string) => v ? Buffer.from(v, 'base64').toString('utf-8') : '';
 
-    // Make.com: base64 인코딩 필드 (titleB64 등) / 어드민 패널: 일반 필드 (title 등)
-    const title = body.title || b64(body.titleB64);
-    const excerpt = body.excerpt || b64(body.excerptB64);
+    // Make.com: base64 인코딩 필드 (*B64) / 어드민 패널: 일반 필드
+    const isMakecom = !!body.titleB64;
+    const title = isMakecom ? b64(body.titleB64) : (body.title || '');
+    const excerpt = isMakecom ? b64(body.excerptB64) : (body.excerpt || '');
     const category = body.category || '';
-    const tags = body.tags || b64(body.tagsB64);
-    const resolvedImagePrompt: string = body.imagePrompt || body.image_prompt || b64(body.image_prompt) || '';
-    const resolvedContent = body.content || b64(body.contentBase64) || b64(body.contentB64);
+    const tags = isMakecom ? b64(body.tagsB64) : (body.tags || '');
+    const resolvedImagePrompt: string = isMakecom ? b64(body.image_prompt) : (body.imagePrompt || body.image_prompt || '');
+    const resolvedContent = isMakecom ? b64(body.contentB64) : (body.content || '');
     const slugSuffix = body.slugSuffix || '';
 
     if (!title || !resolvedContent) {
