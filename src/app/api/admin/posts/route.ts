@@ -67,7 +67,9 @@ export async function POST(request: NextRequest) {
     const dateStr = now.toISOString().split('T')[0];
 
     // Build frontmatter
-    const tagsArray = Array.isArray(tags) ? tags : (tags || '').split(',').map((t: string) => t.trim()).filter(Boolean);
+    // tags: Make.com에서 "tag1, tag2" 문자열 또는 배열로 올 수 있음
+    const rawTags = typeof tags === 'string' ? tags.replace(/^\[+|\]+$/g, '') : tags;
+    const tagsArray = Array.isArray(rawTags) ? rawTags : (rawTags || '').split(',').map((t: string) => t.trim()).filter(Boolean);
     const imageField = resolvedImagePrompt ? `[나노바나나: ${resolvedImagePrompt}]` : '';
 
     const mdContent = `---
