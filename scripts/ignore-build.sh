@@ -26,11 +26,7 @@ if [ -n "$NON_POST_CHANGES" ]; then
   exit 1
 fi
 
-# posts만 변경된 경우: -t.md(테크, 마지막 라우트) 파일이 포함되면 빌드
-if echo "$CHANGED_FILES" | grep -q '\-t\.md$'; then
-  echo "Last route (-t.md) detected. Proceeding with build."
-  exit 1
-fi
-
-echo "Intermediate post commit. Skipping build."
-exit 0
+# posts만 변경된 경우: 어떤 포스트든 빌드 진행
+# (Make.com에서 일부 route만 성공해도 빌드 되도록)
+echo "Post changes detected. Proceeding with build."
+exit 1
