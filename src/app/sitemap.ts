@@ -48,19 +48,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.9,
     }))
 
-    // 태그 페이지: 모든 고유 태그에 대한 URL 생성
-    const tagSet = new Set<string>();
+    // 태그 페이지: 글 3개 이상인 태그만 sitemap에 포함 (thin content 방지)
+    const tagCount = new Map<string, number>();
     for (const post of posts) {
         for (const tag of post.tags) {
-            tagSet.add(tag);
+            tagCount.set(tag, (tagCount.get(tag) || 0) + 1);
         }
     }
-    const tagUrls = Array.from(tagSet).map((tag) => ({
-        url: `${baseUrl}/tag/${encodeURIComponent(tag)}`,
-        lastModified: new Date().toISOString(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.5,
-    }));
+    const tagUrls = Array.from(tagCount.entries())
+        .filter(([, count]) => count >= 3)
+        .map(([tag]) => ({
+            url: `${baseUrl}/tag/${encodeURIComponent(tag)}`,
+            lastModified: new Date().toISOString(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.5,
+        }));
 
     const staticPages = [
         { url: `${baseUrl}/about`, changeFrequency: 'monthly' as const, priority: 0.5 },

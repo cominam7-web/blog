@@ -20,10 +20,15 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ tag: string }> }): Promise<Metadata> {
     const { tag } = await params;
     const decoded = decodeURIComponent(tag);
+    const allPosts = getSortedPostsData();
+    const matchCount = allPosts.filter((p) => p.tags.some((t) => t === decoded)).length;
+
     return {
         title: `#${decoded} 관련 글`,
         description: `일상감 라이프 스튜디오에서 "${decoded}" 태그와 관련된 모든 글을 확인하세요.`,
         alternates: { canonical: `/tag/${tag}` },
+        // 글 3개 미만 태그는 noindex (thin content 방지)
+        ...(matchCount < 3 && { robots: { index: false, follow: true } }),
         openGraph: {
             title: `#${decoded} 관련 글 | Ilsanggam Life Studio`,
             description: `"${decoded}" 태그와 관련된 모든 글`,
