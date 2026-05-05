@@ -5,11 +5,5 @@
       "main": true,
       "master": true
     }
-  },
-  "crons": [
-    {
-      "path": "/api/cron/card-news",
-      "schedule": "0 22 * * *"
-    }
-  ]
+  }
 }
